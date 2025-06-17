@@ -72,3 +72,20 @@ This project is licensed under the MIT License.
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
+
+## 📋 Detailed Features
+- **User Authentication:** Secure login and registration with JWT token management.
+- **Profile Management:** Users can update their profile information and manage their account settings.
+- **Video Streaming:** High-quality video playback with support for various formats and resolutions.
+- **Interactive Features:** Users can like, comment, and subscribe to channels, enhancing social interaction.
+- **Playlist Management:** Create and manage playlists to organize videos according to user preferences.
+- **Watch History:** Track and manage video watch history, allowing users to resume videos from where they left off.
+- **Responsive Design:** The UI is designed to be responsive, providing a seamless experience across different devices and screen sizes.
+
+## 📋 MiniPlayer Feature
+- **MiniPlayer:** A compact video player that allows users to continue watching videos while navigating through the application. It provides basic playback controls and can be minimized or expanded as needed.
+
+## 📋 Video Management Features
+- **Upload Videos:** Users can upload videos to the platform, with support for various formats and resolutions.
+- **Delete Videos:** Users can delete their uploaded videos, removing them from the platform.
+- **Edit Videos:** Users can edit video details such as title, description, and thumbnail, allowing for easy content management.
