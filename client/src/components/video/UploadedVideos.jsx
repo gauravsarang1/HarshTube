@@ -13,6 +13,12 @@ const UploadedVideos = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setIsOwnProfile(user.username === username);
+  }, [username]);
 
   const fetchUploadedVideos = async () => {
     try {
@@ -99,20 +105,25 @@ const UploadedVideos = () => {
 
   return (
     <div className="min-h-screen pt-10 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-3">
-        <div className='flex items-center gap-2 md:gap-4'>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Uploaded Videos</h1>
-          <span className="text-md text-white bg-blue-500 px-2 py-1 rounded-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className='flex flex-wrap items-center gap-3 md:gap-5'>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+            My Uploaded Videos
+          </h1>
+          <span className="text-sm sm:text-base font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
             {Array.isArray(videos) ? videos.length : 0} videos
           </span>
         </div>
-        <Link
-            to={`/upload`}
-            className="flex items-center gap-2 px-4 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            <Upload size={20} />
-            Upload
-          </Link>
+        {isOwnProfile && (
+           <Link
+           to={`/upload`}
+           className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-2.5 bg-gray-800 dark:bg-gray-700 text-white rounded-xl hover:bg-gray-900 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md"
+         >
+           <Upload size={20} className="sm:size-5" />
+           <span className="text-sm sm:text-base font-medium">Upload</span>
+         </Link>
+        )}
+       
       </div>
       
       <VideoGrid

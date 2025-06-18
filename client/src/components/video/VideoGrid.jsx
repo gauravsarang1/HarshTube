@@ -75,6 +75,7 @@ const VideoGrid = ({
               key={video._id}
               to={`/watch/${video._id}`}
               className="group"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               <div className="relative aspect-video rounded-lg overflow-hidden">
                 <img

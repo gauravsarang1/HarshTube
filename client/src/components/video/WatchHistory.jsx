@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Play, Loader2, Trash2 } from 'lucide-react';
 
 const WatchHistory = () => {
@@ -11,6 +11,13 @@ const WatchHistory = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const { username } = useParams();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setIsOwnProfile(user.username === username);
+  }, [username]);
 
   const fetchWatchHistory = useCallback(async (page) => {
     try {
@@ -120,20 +127,24 @@ const WatchHistory = () => {
   }
   return (
     <div className='min-h-screen pt-10 px-4 sm:px-6 lg:px-8'>
-      <div className='flex items-center justify-between gap-2 md:gap-4 mb-10'>
-        <div className='flex items-center gap-2'>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Watch History</h1>
-            <span className="text-md text-white bg-blue-500 px-2 py-1 rounded-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className='flex flex-wrap items-center gap-3 md:gap-5'>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+            My Watch History
+          </h1>
+          <span className="text-sm sm:text-base font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
             {Array.isArray(videos) ? videos.length : 0} videos
-            </span>
+          </span>
         </div>
-        <button
-            onClick={() => handleClearWatchHistory()}
-            className="px-4 flex items-center gap-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-        >
-            <Trash2 size={20} />
-            Clear All
-        </button>
+        {isOwnProfile && (
+          <button
+            onClick={handleClearWatchHistory}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Clear Watch History
+          </button>
+        )}
+        
       </div>
       {/* Loading State */}
       {loading ? (

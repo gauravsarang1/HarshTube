@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setIsActive } from './features/body/miniPlayerSlice';
 import axios from 'axios';
 import AddToPlaylist from './components/playlist/AddToPlaylist';
+import Settings from './components/settings/Settings';
 
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -94,6 +95,7 @@ const AppContent = () => {
           <Route path="/playlist/:playlistId/add-videos" element={isAuthenticated ? <AddToPlaylist /> : <Navigate to="/login" />} />
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
           <Route path="/profile/:username" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+          <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
         </Routes>
       </main>
       {isActive && isAuthenticated && <MiniPlayer />}

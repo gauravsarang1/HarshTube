@@ -1,7 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import { Play, Clock, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import VideoGrid from '../video/VideoGrid';
+
+// Components
+import LoadingSkeleton from './components/LoadingSkeleton';
+import ErrorDisplay from './components/ErrorDisplay';
+
+// Utils
+import { fetchVideos } from './utils/api';
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
@@ -12,7 +18,7 @@ const Home = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
 
-  const fetchVideos = useCallback(async (page) => {
+  const loadVideos = useCallback(async (page) => {
     try {
       if (page === 1) {
         setLoading(true);
@@ -27,18 +33,14 @@ const Home = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/videos/all-videos?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      const { videos: videoList, hasMore: more } = response.data.data;
+      const { videos: videoList, hasMore: more } = await fetchVideos(page, token);
+
+      const randomVideos = videoList.sort(() => Math.random() - 0.5);
       
       if (page === 1) {
-        setVideos(videoList);
+        setVideos(randomVideos);
       } else {
-        setVideos(prev => [...prev, ...videoList]);
+        setVideos(prev => [...prev, ...randomVideos]);
       }
       
       setHasMore(more);
@@ -58,11 +60,9 @@ const Home = () => {
     }
   }, [navigate]);
 
-  
-
   useEffect(() => {
-    fetchVideos(1);
-  }, [fetchVideos]);
+    loadVideos(1);
+  }, [loadVideos]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,14 +71,14 @@ const Home = () => {
 
       if (scrollPosition >= threshold) {
         if (!loadingMore && hasMore) {
-          fetchVideos(currentPage + 1);
+          loadVideos(currentPage + 1);
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [loadingMore, hasMore, currentPage, fetchVideos]);
+  }, [loadingMore, hasMore, currentPage, loadVideos]);
 
   const formatDuration = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -103,99 +103,23 @@ const Home = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-lg"></div>
-              <div className="mt-2 space-y-2">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p className="text-red-500 dark:text-red-400">{error}</p>
-          <button
-            onClick={() => fetchVideos(1)}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorDisplay error={error} onRetry={() => loadVideos(1)} />;
   }
 
   return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {videos.map((video) => (
-          <Link
-            key={video._id}
-            to={`/watch/${video._id}`}
-            className="group"
-          >
-            <div className="relative aspect-video rounded-lg overflow-hidden">
-              <img
-                src={video.thumbnail}
-                alt={video.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              />
-              <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-sm">
-                {formatDuration(video.duration)}
-              </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-                <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              </div>
-            </div>
-            <div className="mt-2">
-              <h3 className="font-medium text-gray-900 dark:text-white line-clamp-2">
-                {video.title}
-              </h3>
-              <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  {video.owner?.avatar && (
-                    <img
-                      src={video.owner.avatar}
-                      alt={video.owner.fullName}
-                      className="w-6 h-6 rounded-full"
-                    />
-                  )}
-                  <span>{video.owner?.fullName || 'Unknown User'}</span>
-                </div>
-                <span>•</span>
-                <span>{video.views} {video.views === 1 ? 'view' : 'views'}</span>
-                <span>•</span>
-                <span>{formatDate(video.createdAt)}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Loading Indicator */}
-      {loadingMore && (
-        <div className="flex justify-center py-8">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-        </div>
-      )}
-
-      {/* No More Videos Message */}
-      {!hasMore && videos.length > 0 && (
-        <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-          No more videos to load
-        </div>
-      )}
+    <div className="min-h-screen pt-10 md:pt-20 px-4 sm:px-6 lg:px-8">
+      <VideoGrid
+        videos={videos}
+        loading={loading}
+        error={error}
+        loadingMore={loadingMore}
+        hasMore={hasMore}
+        onClick={() => loadVideos(1)}
+      />
     </div>
   );
 };

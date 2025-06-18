@@ -67,7 +67,7 @@ const DropDown = ({ userData, handleTheme, handleLogout, handleSettings, handleP
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuSub>
+        {/*<DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Palette className="mr-2 h-4 w-4" />
             <span>Theme</span>
@@ -89,7 +89,7 @@ const DropDown = ({ userData, handleTheme, handleLogout, handleSettings, handleP
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator />*/}
         <DropdownMenuItem 
           className="text-red-600 focus:text-red-600"
           onClick={handleLogout}

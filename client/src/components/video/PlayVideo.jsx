@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link ,useLocation} from 'react-router-dom';
 import axios from 'axios';
 import { ThumbsUp, MessageCircle, Share2, Clock, Eye, MoreVertical, ThumbsDown, Flag, BookmarkPlus, ChevronLeft, ChevronRight, Loader2, Minimize2 } from 'lucide-react';
-import Comments from './Comments';
+import Comments from '../comments/Comments';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsActive, setCurrentTime, setVideoSrc, setVideoId } from '../../features/body/miniPlayerSlice';
 
@@ -120,7 +120,7 @@ const PlayVideo = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:5050/api/v1/videos/all-videos?page=${page}`,
+        `http://localhost:5050/api/v1/videos/all-videos?page=${page}&limit=${10}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -128,13 +128,15 @@ const PlayVideo = () => {
         }
       );
 
-      const { videos: videoList, totalPages: pages, hasMore: more } = response.data.data;
+      const { videos: videoList, hasMore: more } = response.data.data;
+      console.log('hasMore', more);
       
       // Filter out the current video and add new videos
       const filteredVideos = videoList.filter(v => v._id !== videoId);
+      const randomVideos = filteredVideos.sort(() => Math.random() - 0.5);
       
       if (page === 1) {
-        setRelatedVideos(filteredVideos);
+        setRelatedVideos(randomVideos);
       } else {
         // Ensure no duplicate videos are added
         setRelatedVideos(prev => {
@@ -144,7 +146,7 @@ const PlayVideo = () => {
         });
       }
       
-      setTotalPages(pages);
+      //setTotalPages(pages);
       setHasMore(more);
       setCurrentPage(page);
     } catch (err) {
@@ -161,22 +163,18 @@ const PlayVideo = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sidebar = document.querySelector('.related-videos');
-      if (sidebar) {
-        const { scrollTop, scrollHeight, clientHeight } = sidebar;
-        if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-          if (!loadingMore && hasMore) {
-            fetchRelatedVideos(currentPage + 1);
-          }
+      const scrollPosition = window.innerHeight + document.documentElement.scrollTop;
+      const threshold = document.documentElement.offsetHeight - 1000; // Load more when 1000px from bottom
+
+      if (scrollPosition >= threshold) {
+        if (!loadingMore && hasMore) {
+          fetchRelatedVideos(currentPage + 1);
         }
       }
     };
 
-    const sidebar = document.querySelector('.related-videos');
-    if (sidebar) {
-      sidebar.addEventListener('scroll', handleScroll);
-      return () => sidebar.removeEventListener('scroll', handleScroll);
-    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [loadingMore, hasMore, currentPage, fetchRelatedVideos]);
 
   const formatDuration = (seconds) => {
@@ -266,28 +264,7 @@ const PlayVideo = () => {
         return;
       }
 
-      // Immediately update UI state to prevent double-clicks
-      if (reactionType === 'like') {
-        if (liked) {
-          setLiked(false);
-          setVideoLikes(prev => prev.filter(r => r.owner !== JSON.parse(localStorage.getItem('user') || '{}')._id));
-        } else {
-          setLiked(true);
-          setDisliked(false);
-          setVideoDislikes(prev => prev.filter(r => r.owner !== JSON.parse(localStorage.getItem('user') || '{}')._id));
-        }
-      } else {
-        if (disliked) {
-          setDisliked(false);
-          setVideoDislikes(prev => prev.filter(r => r.owner !== JSON.parse(localStorage.getItem('user') || '{}')._id));
-        } else {
-          setDisliked(true);
-          setLiked(false);
-          setVideoLikes(prev => prev.filter(r => r.owner !== JSON.parse(localStorage.getItem('user') || '{}')._id));
-        }
-      }
-
-      // Make API call
+      // Make API call first
       const response = await axios.post(
         `http://localhost:5050/api/v1/likes/toggle/v/${videoId}`,
         {},
@@ -299,44 +276,45 @@ const PlayVideo = () => {
         }
       );
 
-      // If API call fails, revert the UI state
       if (!response.data?.data) {
-        if (reactionType === 'like') {
-          setLiked(!liked);
-          setDisliked(false);
-        } else {
-          setDisliked(!disliked);
-          setLiked(false);
-        }
         return;
       }
 
       const reaction = response.data.data;
       
-      // Update counts based on API response
+      // Update states based on API response
       if (reaction.type === 'like') {
+        setLiked(true);
+        setDisliked(false);
         setVideoLikes(prev => {
           const filtered = prev.filter(r => r.owner !== reaction.owner);
           return [...filtered, reaction];
         });
         setVideoDislikes(prev => prev.filter(r => r.owner !== reaction.owner));
       } else if (reaction.type === 'disLike') {
+        setDisliked(true);
+        setLiked(false);
         setVideoDislikes(prev => {
           const filtered = prev.filter(r => r.owner !== reaction.owner);
           return [...filtered, reaction];
         });
         setVideoLikes(prev => prev.filter(r => r.owner !== reaction.owner));
+      } else {
+        // Handle removal of reaction
+        if (reactionType === 'like') {
+          setLiked(false);
+          setVideoLikes(prev => prev.filter(r => r.owner !== reaction.owner));
+        } else {
+          setDisliked(false);
+          setVideoDislikes(prev => prev.filter(r => r.owner !== reaction.owner));
+        }
       }
 
     } catch (err) {
       console.error('Error toggling video reaction:', err);
-      // Revert UI state on error
-      if (reactionType === 'like') {
-        setLiked(!liked);
-        setDisliked(false);
-      } else {
-        setDisliked(!disliked);
-        setLiked(false);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
       }
     }
   };
@@ -629,12 +607,12 @@ const PlayVideo = () => {
           </div>
 
           {/* Sidebar - Related Videos */}
-          <div className="space-y-4">
+          <div className="space-y-4 min-h-screen">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               Related Videos
             </h2>
             <div 
-              className="related-videos space-y-4 h-screen overflow-y-auto pr-2"
+              className="related-videos space-y-4 min-hscreen overflow-y-auto pr-2"
               style={{
                 scrollbarWidth: 'none',  /* Firefox */
                 msOverflowStyle: 'none',  /* IE and Edge */
@@ -651,6 +629,7 @@ const PlayVideo = () => {
                 <Link
                   key={relatedVideo._id}
                   to={`/watch/${relatedVideo._id}`}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="flex gap-3 group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 transition-all"
                 >
                   {/* Thumbnail */}

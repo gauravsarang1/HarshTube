@@ -3,6 +3,7 @@ import searchBarReducer from '../features/header/searchBarSlice';
 import sideBarReducer from '../features/header/sideBarSlice';
 import themeReducer from '../features/header/themeSlice';
 import miniPlayerReducer from '../features/body/miniPlayerSlice';
+import commentReducer from '../features/body/commentSlice';
 
 const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
         sideBar: sideBarReducer,
         themes: themeReducer,
         miniPlayer: miniPlayerReducer,
+        comment: commentReducer,
     },
 });
 
