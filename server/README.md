@@ -1,80 +1,199 @@
-# Backend Overview
+# HarshTube Backend Server
 
-The backend of HarshTube is built using Node.js and Express.js, providing a robust API for the frontend to interact with.
+This is the backend server for the HarshTube application, built with Node.js and Express.js.
 
-## 🚀 Features
-- User authentication and profile management
-- Video upload, streaming, and playback
-- Like, comment, and subscribe functionality
-- Playlist creation and management
-- Watch history tracking
-- Responsive and modern API
+## Tech Stack
 
-## 🛠️ Tech Stack
-- **Framework:** Node.js with Express.js
-- **Database:** MongoDB
-- **Authentication:** JWT (JSON Web Tokens)
-- **File Storage:** Cloudinary
-- **API Documentation:** Swagger
-- **Testing:** Jest
-- **Development Tools:** Nodemon, ESLint
+- **Runtime Environment**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **File Upload**: Multer with Cloudinary integration
+- **Other Key Dependencies**:
+  - bcrypt: For password hashing
+  - cors: For handling Cross-Origin Resource Sharing
+  - cookie-parser: For parsing cookies
+  - mongoose-aggregate-paginate-v2: For pagination support
 
-## 📦 Installation
+## Project Structure
 
-1. Clone the repository:
-```bash
-git clone [repository-url]
-cd HarshTube/client
+```
+server/
+├── src/              # Source code directory
+├── public/           # Public assets
+├── node_modules/     # Dependencies
+├── package.json      # Project configuration and dependencies
+├── .prettierrc      # Prettier configuration
+└── .gitignore       # Git ignore rules
 ```
 
-2. Install dependencies:
-```bash
-npm install
+## Getting Started
+
+1. **Installation**
+   ```bash
+   npm install
+   ```
+
+2. **Environment Setup**
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   PORT=5050
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   ```
+
+3. **Running the Server**
+   ```bash
+   npm run dev
+   ```
+   The server will start on http://localhost:5050 (or the port specified in your .env file)
+
+## API Endpoints
+
+The server provides various endpoints for:
+- User authentication (signup, login, logout)
+- Video management (upload, update, delete)
+- User profile management
+- Comments and interactions
+
+## Development
+
+- The server uses nodemon for development, which automatically restarts when changes are detected
+- Code formatting is handled by Prettier
+- The project follows ES modules syntax (type: "module" in package.json)
+
+## Security Features
+
+- Password hashing using bcrypt
+- JWT-based authentication
+- CORS enabled
+- Secure cookie handling
+- Environment variable management
+
+## File Upload
+
+The server uses Multer for handling file uploads and Cloudinary for cloud storage of media files.
+
+## Database
+
+MongoDB is used as the primary database with Mongoose as the ODM. The database connection is established in `src/db/index.js`.
+
+## Error Handling
+
+The server implements comprehensive error handling for various scenarios including:
+- Database connection errors
+- Authentication errors
+- File upload errors
+- API request validation
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## Database Models
+
+The application uses MongoDB with Mongoose ODM. Here's a detailed breakdown of the data models:
+
+### User Model (`user.model.js`)
+```javascript
+{
+    username: String,      // Required, unique, indexed
+    email: String,         // Required, unique
+    password: String,      // Required, hashed
+    fullName: String,      // Required
+    avatar: String,        // Required, Cloudinary URL
+    coverImage: String,    // Optional, Cloudinary URL
+    watchHistory: [        // Array of Video references
+        {
+            type: ObjectId,
+            ref: 'Video'
+        }
+    ],
+    refreshToken: String   // For JWT refresh token
+}
 ```
+**Methods:**
+- `isPasswordCorrect(password)`: Verifies password
+- `generateAccessToken()`: Generates JWT access token
+- `generateRefreshToken()`: Generates JWT refresh token
 
-3. Start the development server:
-```bash
-npm start
+### Video Model (`video.model.js`)
+```javascript
+{
+    filePath: String,      // Required, video file path
+    thumbnail: String,     // Optional, thumbnail URL
+    duration: Number,      // Required, video duration
+    owner: {              // Reference to User
+        type: ObjectId,
+        ref: 'User'
+    },
+    title: String,        // Required
+    description: String,  // Required
+    views: Number,        // Default: 0
+    isPublished: Boolean  // Default: true
+}
 ```
+**Features:**
+- Supports pagination using mongoose-aggregate-paginate-v2
+- Timestamps for creation and updates
 
-## 🏗️ Project Structure
-- `src/` - Source code
-  - `controllers/` - API controllers
-  - `models/` - Database models
-  - `routes/` - API routes
-  - `middlewares/` - Middleware functions
-  - `utils/` - Utility functions and helpers
-  - `db/` - Database configuration
-  - `index.js` - Application entry point
+### Comment Model (`comment.model.js`)
+```javascript
+{
+    content: String,      // Required
+    owner: {             // Reference to User
+        type: ObjectId,
+        ref: 'User'
+    },
+    video: {             // Reference to Video
+        type: ObjectId,
+        ref: 'Video'
+    }
+}
+```
+**Features:**
+- Supports pagination
+- Timestamps for creation and updates
 
-## 🔧 Configuration Files
-- `package.json` - Project dependencies and scripts
-- `nodemon.json` - Nodemon configuration
-- `eslint.config.js` - ESLint configuration
+### Additional Models
 
-## 📝 License
-This project is licensed under the MIT License.
+#### WatchHistory Model (`watchHistory.model.js`)
+Tracks user video watch history with timestamps.
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
+#### Likes Model (`likes.model.js`)
+Manages video likes and user interactions.
 
-## 📋 Brief Explanation
-The backend of HarshTube is designed to handle user authentication, video management, and interaction features like comments and likes. It uses Node.js and Express.js to create a RESTful API, with MongoDB for data storage and JWT for secure authentication. The API is documented using Swagger, and the project is set up for testing with Jest. The development environment is enhanced with tools like Nodemon and ESLint for better code quality and ease of development.
+#### Subscription Model (`subscription.model.js`)
+Handles user subscriptions and channel following.
 
-## 📋 Detailed Backend Information
-- **API Endpoints:** The backend provides various endpoints for user management, video operations, and social interactions. These include endpoints for user registration, login, video upload, and interaction features like comments and likes.
-- **Database Schema:** The MongoDB database is structured with collections for users, videos, comments, likes, and playlists, ensuring efficient data retrieval and management.
-- **Middleware:** Custom middleware functions are used for authentication, error handling, and request validation, enhancing the security and reliability of the API.
-- **File Handling:** Video and image uploads are managed using Cloudinary, providing secure and efficient file storage and retrieval.
-- **Testing:** The backend is thoroughly tested using Jest, ensuring that all API endpoints and business logic function as expected.
-- **Deployment:** The backend is designed to be deployed on cloud platforms, with configurations for environment variables and production settings.
+#### Playlist Model (`playlist.model.js`)
+Manages video playlists with:
+- Name and description
+- Owner reference
+- Array of video references
 
-## 📋 Models Overview
-- **User Model:** Manages user data including username, email, password, and profile images. It includes methods for password hashing and JWT token generation.
-- **Video Model:** Stores video details such as file path, thumbnail, duration, and owner information. It supports pagination for efficient data retrieval.
-- **Comment Model:** Handles user comments on videos, linking them to both the video and the user who made the comment.
-- **Likes Model:** Tracks likes on videos, comments, and tweets, allowing users to interact with content.
-- **Playlist Model:** Manages user-created playlists, allowing users to organize videos into collections.
-- **Subscription Model:** Tracks user subscriptions to channels, enabling social features like following other users.
-- **Tweet Model:** Stores user tweets, providing a platform for users to share thoughts and updates.
-- **WatchHistory Model:** Records user video watch history, including progress tracking for each video.
+#### Tweet Model (`tweet.model.js`)
+Handles social media integration features.
+
+### Model Relationships
+- Users can have multiple videos (one-to-many)
+- Videos can have multiple comments (one-to-many)
+- Users can have multiple playlists (one-to-many)
+- Users can subscribe to multiple channels (many-to-many)
+- Videos can be liked by multiple users (many-to-many)
+- Users can have multiple watch history entries (one-to-many)
+
+### Database Features
+- All models include timestamps (createdAt, updatedAt)
+- Proper indexing on frequently queried fields
+- Referential integrity through MongoDB references
+- Support for pagination where needed
+- Secure password hashing
+- JWT token generation and management 
