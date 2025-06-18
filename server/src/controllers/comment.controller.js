@@ -18,12 +18,39 @@ const addComment = asyncHandler(async(req, res) => {
     const comment = await Comment.create({
         content: content.trim(),
         owner: req.user._id,
-        video: videoId
+        video: new mongoose.Types.ObjectId(videoId)
     })
+
+    // Populate owner details for the response
+    const populatedComment = await Comment.aggregate([
+        { $match: { _id: comment._id } },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'owner'
+            }
+        },
+        { $unwind: '$owner' },
+        {
+            $project: {
+                content: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                owner: {
+                    _id: '$owner._id',
+                    name: '$owner.username',
+                    fullName: '$owner.fullName',
+                    avatar: '$owner.avatar'
+                }
+            }
+        }
+    ]);
 
     return res.status(200)
     .json(
-        new ApiResponse(201, comment, 'Comment added successfully')
+        new ApiResponse(201, populatedComment[0], 'Comment added successfully')
     )
 });
 
@@ -75,10 +102,11 @@ const deleteComment = asyncHandler(async(req, res) => {
     )
 })
 
-const getAllComments = asyncHandler(async(req, res) => {
-    const videoId = req.params.videoId
-    if(!videoId) {
-        throw new ApiError(404, 'Video id not found')
+const getAllComments = asyncHandler(async (req, res) => {
+    const videoId = req.params.videoId;
+
+    if (!videoId) {
+        throw new ApiError(404, 'Video id not found');
     }
 
     const comments = await Comment.aggregate([
@@ -100,6 +128,14 @@ const getAllComments = asyncHandler(async(req, res) => {
             $sort: { createdAt: -1 }
         },
         {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'comment',
+                as: 'likes'
+            }
+        },
+        {
             $project: {
                 content: 1,
                 createdAt: 1,
@@ -109,15 +145,28 @@ const getAllComments = asyncHandler(async(req, res) => {
                     name: '$owner.username',
                     fullName: '$owner.fullName',
                     avatar: '$owner.avatar'
-                }
+                },
+                likes: 1
             }
         }
-    ])
+    ]);
 
-    return res.status(200)
-    .json(
-        new ApiResponse(200, comments, 'Comments fetched successfully')
-    )
-})  
+    // Now add isLiked and totalLikes in plain JS
+    const enhancedComments = comments.map(comment => {
+        const totalLikes = comment.likes.length;
+        const isLiked = comment.likes.some(like =>
+            like.owner.toString() === req.user._id.toString()
+        );
+        return {
+            ...comment,
+            totalLikes,
+            isLiked
+        };
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, enhancedComments, 'Comments fetched successfully')
+    );
+});
 
 export { addComment, updateComment, deleteComment, getAllComments };
