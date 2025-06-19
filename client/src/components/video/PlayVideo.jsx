@@ -542,7 +542,7 @@ const PlayVideo = () => {
             <div className="mt-6 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
-                <h1 className="text-2xl font-bold text-gray-900 line-clamp-2 text-ellipsis overflow-hidden dark:text-white">
+                <h1 className="md:text-xl text-lg  font-semibold text-gray-900 line-clamp-2 text-ellipsis overflow-hidden dark:text-white/90">
                   {video.title}
                 </h1>
               </div>
