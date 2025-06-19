@@ -142,8 +142,8 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
             playlists: result[0].data,
             page,
             limit,
-            totalPlaylists: result[0].totalCount[0].count,
-            hasMore: skip + result[0].data.length < result[0].totalCount[0].count
+            totalPlaylists: result[0]?.totalCount?.[0]?.count || 0,
+            hasMore: skip + result[0].data.length < result[0]?.totalCount?.[0]?.count || 0
         }, 'All user playlists fetched successfully')
     )
 })
