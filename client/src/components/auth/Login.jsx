@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +17,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       setError('');
-      const response = await axios.post('http://localhost:5050/api/v1/users/login', data);
+      const response = await axios.post(`${API_BASE_URL}/users/login`, data);
       if (response.data?.data?.accessToken && response.data?.data?.refreshToken && response.data?.data?.loggedInUser) {
        const {_id, username, fullName, email, coverImage, avatar, createdAt, updatedAt} = response.data.data.loggedInUser
        const user = {

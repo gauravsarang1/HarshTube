@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { setComments, setLoading, setError } from '../../../features/body/commentSlice';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 export async function fetchComments({ videoId, dispatch, navigate }) {
   try {
     dispatch(setLoading(true));
@@ -9,7 +11,7 @@ export async function fetchComments({ videoId, dispatch, navigate }) {
       navigate('/login');
       return;
     }
-    const response = await axios.get(`http://localhost:5050/api/v1/comments/all/${videoId}`, {
+    const response = await axios.get(`${API_BASE_URL}/comments/all/${videoId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     dispatch(setComments(response.data.data));

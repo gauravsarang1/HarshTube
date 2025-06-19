@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Play, Loader2, Trash2 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const WatchHistory = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ const WatchHistory = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/watch-history/get/?page=${page}`, {
+      const response = await axios.get(`${API_BASE_URL}/watch-history/get/?page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -83,7 +85,7 @@ const WatchHistory = () => {
         navigate('/login');
         return;
       }
-      const response = await axios.delete('http://localhost:5050/api/v1/watch-history/delete/all/watch-history', {
+      const response = await axios.delete(`${API_BASE_URL}/watch-history/delete/all/watch-history`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

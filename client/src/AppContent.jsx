@@ -20,6 +20,8 @@ import Result from './components/search/Result';
 import LikedVideos from './components/video/LikedVideos';
 import WatchHistory from './components/video/WatchHistory';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +46,7 @@ const AppContent = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5050/api/v1/users/me', {
+        const response = await axios.get(`${API_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

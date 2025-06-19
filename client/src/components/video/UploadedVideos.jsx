@@ -4,6 +4,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock , Upload} from 'lucide-react';
 import VideoGrid from './VideoGrid';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const UploadedVideos = () => {
   const { username } = useParams();
   const [videos, setVideos] = useState([]);
@@ -30,7 +32,7 @@ const UploadedVideos = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/videos/all-uploaded-videos/${username}?page=${page}`, {
+      const response = await axios.get(`${API_BASE_URL}/videos/all-uploaded-videos/${username}?page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

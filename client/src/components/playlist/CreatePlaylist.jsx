@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const CreatePlaylist = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ const CreatePlaylist = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5050/api/v1/playlist/create',
+        `${API_BASE_URL}/playlist/create`,
         formData,
         {
           headers: {

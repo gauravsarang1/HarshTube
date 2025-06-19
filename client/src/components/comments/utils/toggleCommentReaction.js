@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { setComments, setCommentlikedUser } from '../../../features/body/commentSlice';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 export async function toggleCommentReaction(commentId, comments, commentlikedUser, dispatch, navigate) {
   try {
     const token = localStorage.getItem('token');
@@ -9,7 +11,7 @@ export async function toggleCommentReaction(commentId, comments, commentlikedUse
       return;
     }
     const response = await axios.post(
-      `http://localhost:5050/api/v1/likes/toggle/c/${commentId}`,
+      `${API_BASE_URL}/likes/toggle/c/${commentId}`,
       { },
       {
         headers: {

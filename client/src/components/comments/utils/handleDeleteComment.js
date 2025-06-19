@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { setComments, setError } from '../../../features/body/commentSlice';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 export async function handleDeleteComment(commentId, comments, dispatch, navigate) {
   try {
     const token = localStorage.getItem('token');
@@ -9,7 +11,7 @@ export async function handleDeleteComment(commentId, comments, dispatch, navigat
       return;
     }
     await axios.delete(
-      `http://localhost:5050/api/v1/comments/delete/${commentId}`,
+      `${API_BASE_URL}/comments/delete/${commentId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

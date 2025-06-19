@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import VideoGrid from './VideoGrid';
 import { Trash2 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const LikedVideos = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ const LikedVideos = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/likes/get/user/liked-videos?page=${page}`, {
+      const response = await axios.get(`${API_BASE_URL}/likes/get/user/liked-videos?page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -81,7 +83,7 @@ const LikedVideos = () => {
   const clearAllLikedVideos = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.delete('http://localhost:5050/api/v1/likes/delete/all/liked-videos', {
+      const response = await axios.delete(`${API_BASE_URL}/likes/delete/all/liked-videos`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

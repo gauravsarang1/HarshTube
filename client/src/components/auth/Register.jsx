@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, Upload, X } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const Register = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -76,7 +78,7 @@ const Register = () => {
         formData.append('coverImage', selectedCover);
       }
 
-      const response = await axios.post('http://localhost:5050/api/v1/users/register', formData, {
+      const response = await axios.post(`${API_BASE_URL}/users/register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

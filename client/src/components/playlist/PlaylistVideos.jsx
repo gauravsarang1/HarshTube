@@ -4,6 +4,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Loader2, Plus } from 'lucide-react';
 import AddToPlaylist from './AddToPlaylist';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const PlaylistVideos = () => {
   const { playlistId } = useParams();
   const [videos, setVideos] = useState([]);
@@ -44,7 +46,7 @@ const PlaylistVideos = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/playlist/user/${playlistId}?page=${page}`, {
+      const response = await axios.get(`${API_BASE_URL}/playlist/user/${playlistId}?page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

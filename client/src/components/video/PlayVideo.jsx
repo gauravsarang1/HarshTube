@@ -55,6 +55,8 @@ const PlayVideo = () => {
     }
   }, [currentTime]);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
   const fetchVideo = async () => {
     try {
       setLoading(true);
@@ -65,7 +67,7 @@ const PlayVideo = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:5050/api/v1/videos/${videoId}`, {
+      const response = await axios.get(`${API_BASE_URL}/videos/${videoId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -78,7 +80,7 @@ const PlayVideo = () => {
       // Fetch subscribers after video data is set
       if (videoData?.owner?._id) {
         const subscribersResponse = await axios.get(
-          `http://localhost:5050/api/v1/subscription/get/user/subscribers/${videoData.owner._id}`,
+          `${API_BASE_URL}/subscription/get/user/subscribers/${videoData.owner._id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -121,7 +123,7 @@ const PlayVideo = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:5050/api/v1/videos/all-videos?page=${page}&limit=${10}`,
+        `${API_BASE_URL}/videos/all-videos?page=${page}&limit=${10}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -225,8 +227,8 @@ const PlayVideo = () => {
       const headers = { Authorization: `Bearer ${token}` };
   
       const [likesRes, dislikesRes] = await Promise.all([
-        axios.get(`http://localhost:5050/api/v1/likes/get/video/likes/${videoId}`, { headers }),
-        axios.get(`http://localhost:5050/api/v1/likes/get/video/disLikes/${videoId}`, { headers })
+        axios.get(`${API_BASE_URL}/likes/get/video/likes/${videoId}`, { headers }),
+        axios.get(`${API_BASE_URL}/likes/get/video/disLikes/${videoId}`, { headers })
       ]);
   
       const likes = likesRes.data?.data || [];
@@ -277,7 +279,7 @@ const PlayVideo = () => {
 
       // Make API call first
       const response = await axios.post(
-        `http://localhost:5050/api/v1/likes/toggle/v/${videoId}`,
+        `${API_BASE_URL}/likes/toggle/v/${videoId}`,
         {},
         {
           headers: {
@@ -358,7 +360,7 @@ const PlayVideo = () => {
       }
       console.log( 'video.owner._id', video.owner._id);
       const response = await axios.post(
-        `http://localhost:5050/api/v1/subscription/toggle/sub/${video.owner._id}`,
+        `${API_BASE_URL}/subscription/toggle/sub/${video.owner._id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -404,7 +406,7 @@ const PlayVideo = () => {
         return;
       }
 
-      const response = await axios.post(`http://localhost:5050/api/v1/watch-history/add/${videoId}`,
+      const response = await axios.post(`${API_BASE_URL}/watch-history/add/${videoId}`,
       {},
       {
         headers: {

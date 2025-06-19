@@ -5,6 +5,8 @@ import ResultUsers from './ResultUsers';
 import ResultVideos from './ResultVideos';
 import ResultPlaylists from './ResultPlaylists';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const Result = () => {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -24,17 +26,17 @@ const Result = () => {
     setLoading(true);
     setError(null);
     Promise.all([
-      axios.get(`/api/v1/users/search?q=${encodeURIComponent(query)}`, {
+      axios.get(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }),
-      axios.get(`/api/v1/videos/search?q=${encodeURIComponent(query)}`, {
+      axios.get(`${API_BASE_URL}/videos/search?q=${encodeURIComponent(query)}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }),
-      axios.get(`/api/v1/playlist/search?q=${encodeURIComponent(query)}`, {
+      axios.get(`${API_BASE_URL}/playlist/search?q=${encodeURIComponent(query)}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

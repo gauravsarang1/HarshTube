@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { setSubmitting, setComments, setNewComment, setSubmitType, setError } from '../../../features/body/commentSlice';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 export async function handleSubmitComment(e, newComment, submitType, videoId, dispatch, navigate, comments) {
   e.preventDefault();
   if (!newComment.trim()) return;
@@ -14,7 +16,7 @@ export async function handleSubmitComment(e, newComment, submitType, videoId, di
     }
     if (submitType.type === 'edit') {
       await axios.patch(
-        `http://localhost:5050/api/v1/comments/update/${submitType.commentId}`,
+        `${API_BASE_URL}/comments/update/${submitType.commentId}`,
         { content: newComment },
         {
           headers: {
@@ -32,7 +34,7 @@ export async function handleSubmitComment(e, newComment, submitType, videoId, di
       return;
     }
     const response = await axios.post(
-      `http://localhost:5050/api/v1/comments/add/${videoId}`,
+      `${API_BASE_URL}/comments/add/${videoId}`,
       { content: newComment },
       {
         headers: {
