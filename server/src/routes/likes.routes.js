@@ -6,7 +6,8 @@ import {
     toggleTweetLike,
     getAllVideoDislikes,
     getAllCommentLikes,
-    getAllLikedVideos
+    getAllLikedVideos,
+    deleteAllVideosLiked
 } from "../controllers/likes.controller.js"
 import {verifyJwt} from "../middlewares/auth.middlewares.js"
 
@@ -20,6 +21,6 @@ router.route("/get/video/likes/:videoId").get(getAllVideoLikes);
 router.route("/get/video/dislikes/:videoId").get(getAllVideoDislikes);
 router.route("/get/comment/likes/:commentId").get(getAllCommentLikes);
 router.route("/get/user/liked-videos").get(getAllLikedVideos);
-
+router.route("/delete/all/liked-videos").delete(deleteAllVideosLiked);
 
 export default router

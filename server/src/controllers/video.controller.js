@@ -112,7 +112,8 @@ const allVideos = asyncHandler(async(req, res) => {
         Video.find({})
             .populate('owner', 'username avatar fullName')
             .skip(skip)
-            .limit(limit),
+            .limit(limit)
+            .sort({ createdAt: -1 }),
         Video.countDocuments({})
     ]);
 
@@ -135,6 +136,11 @@ const getVideoById = asyncHandler(async(req, res) => {
     const videoId = req.params.videoId;
     if(!videoId) {
         throw new ApiError(400, 'Video ID is required');
+    }
+
+    // Fix: Use mongoose.Types.ObjectId.isValid instead of mongoose.Schema.ObjectId.isValid
+    if(!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, 'Invalid video ID');
     }
 
     const video = await Video.findById(videoId).populate('owner', 'username avatar fullName');
@@ -181,10 +187,28 @@ const deleteVideo = asyncHandler(async(req, res) => {
     );
 })
 
+const getVideosByTitle = asyncHandler(async(req, res) => {
+    const title = req.query.q;    
+    if(!title) {
+        throw new ApiError(400, 'Title is required');
+    }
+
+    const videos = await Video.find({ title: { $regex: title, $options: 'i' } }).populate('owner', 'username avatar fullName');
+    if(!videos || videos.length === 0) {
+        return res.status(200).json(new ApiResponse(200, [], 'No videos found'));
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200, videos, 'Videos fetched successfully')
+    );
+})
+
 export {
     uploadVideo,
     getAllUploadedVideos,
     allVideos,
     getVideoById,
-    deleteVideo
+    deleteVideo,
+    getVideosByTitle
 }

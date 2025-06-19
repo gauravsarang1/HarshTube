@@ -29,6 +29,8 @@ const AuthenticatedActions = ({
         handleLogout={handleLogout}
         handleSettings={() => navigate('/settings')}
         handleProfile={() => navigate(`/profile/${userData?.username}`)}
+        handleLikedVideos={() => navigate('/liked-videos')}
+        handleWatchHistory={() => navigate('/watch-history')}
       />
     </div>
   );

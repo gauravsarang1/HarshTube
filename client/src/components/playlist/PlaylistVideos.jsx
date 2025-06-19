@@ -16,9 +16,18 @@ const PlaylistVideos = () => {
     name: '',
     description: '',
     totalVideos: 0,
+    owner: {}
   });
   const [showAddToPlaylist, setShowAddToPlaylist] = useState(false);
   const navigate = useNavigate();
+  const [ownProfile, setOwnProfile] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if(user.username === playlist.owner.username) {
+      setOwnProfile(true);
+    }
+  }, [playlist]);
 
   const fetchPlaylistVideos = useCallback(async (page) => {
     try {
@@ -168,6 +177,7 @@ const PlaylistVideos = () => {
                 {Array.isArray(videos) && videos.length} {Array.isArray(videos) && videos.length === 1 ? 'video' : 'videos'}
             </p>
             </div>
+            {ownProfile && (
             <button
                 onClick={() => setShowAddToPlaylist(true)}
                 className="hidden md:flex  gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -175,6 +185,7 @@ const PlaylistVideos = () => {
             <Plus size={20} />
             Add Videos
             </button>
+            )}
             <Link
                 to={`/playlist/${playlistId}/add-videos`}
                 className="flex md:hidden items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"

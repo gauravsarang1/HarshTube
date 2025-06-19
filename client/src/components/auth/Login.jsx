@@ -31,7 +31,6 @@ const Login = () => {
        console.log( 'user', user);
        
         localStorage.setItem('token', response.data.data.accessToken);
-        localStorage.setItem('refreshToken', response.data.data.refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/home');
       }

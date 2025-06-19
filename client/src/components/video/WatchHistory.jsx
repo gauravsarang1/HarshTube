@@ -76,6 +76,28 @@ const WatchHistory = () => {
     fetchWatchHistory(1);
   }, [fetchWatchHistory]);
 
+  const clearAllWatchHistory = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if(!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await axios.delete('http://localhost:5050/api/v1/watch-history/delete/all/watch-history', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if(response.status === 200) {
+        setVideos([]);
+        setCurrentPage(1);
+        setHasMore(true);
+      }
+    } catch (error) {
+      console.error('Error clearing all watch history:', error);
+    }
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.innerHeight + document.documentElement.scrollTop;
@@ -138,7 +160,7 @@ const WatchHistory = () => {
         </div>
         {isOwnProfile && (
           <button
-            onClick={handleClearWatchHistory}
+            onClick={clearAllWatchHistory}
             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
           >
             Clear Watch History

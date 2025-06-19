@@ -126,10 +126,8 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
                 data: [
                     { $skip: skip },
                     { $limit: limit }
-                ],
-                totalCount: [
-                    { $count: 'count' }
                 ]
+                
             }
         }
     ])
@@ -144,7 +142,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
             playlists: result[0].data,
             page,
             limit,
-            totalPages: Math.ceil(result[0].totalCount[0].count / limit),
             totalPlaylists: result[0].totalCount[0].count,
             hasMore: skip + result[0].data.length < result[0].totalCount[0].count
         }, 'All user playlists fetched successfully')
@@ -263,7 +260,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     }
 
     const {name, description} = req.body
-    if(!(name && description )) {
+    if(!(name || description )) {
         throw new ApiError(400, 'name and description are required')
     }
     
@@ -374,7 +371,7 @@ const AllUserPlaylists = asyncHandler(async (req, res) => {
         }
     ]);
 
-    if(result.length === 0) {
+    if(result.length === 0 ) {
         throw new ApiError(404, 'no playlists found')
     }
 
@@ -391,6 +388,79 @@ const AllUserPlaylists = asyncHandler(async (req, res) => {
     )
 })
 
+const getPlaylistsByTitle = asyncHandler(async(req, res) => {
+    const title = req.query.q;
+    if(!title) {
+        throw new ApiError(400, 'Title is required');
+    }
+
+    //const playlists = await Playlist.find({ name: { $regex: title, $options: 'i' } });
+
+    const playlists = await Playlist.aggregate([
+        {
+            $match: { name: { $regex: title, $options: 'i' } }
+        },
+        {
+            $sort: { createdAt: -1 }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'owner'
+            }
+        },
+        {
+            $unwind: '$owner'
+        },
+        {
+            $lookup: {
+                from: 'videos',
+                localField: 'videos',
+                foreignField: '_id',
+                as: 'videos'
+            }
+        },
+        {
+            $addFields: {
+                PlaylistThumbnail: {
+                    $ifNull: [
+                        { $arrayElemAt: ['$videos.thumbnail', 0] },
+                        null
+                    ]
+                }
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                PlaylistThumbnail: 1,
+                videos: 1,
+                owner: {
+                    _id: '$owner._id',
+                    username: '$owner.username',
+                    avatar: '$owner.avatar',
+                    fullName: '$owner.fullName'
+                }
+            }
+        }
+    ])
+
+
+
+    if(!playlists || playlists.length === 0) {
+        return res.status(200).json(new ApiResponse(200, [], 'No playlists found'));
+    }
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200, playlists, 'Playlists fetched successfully')
+    )
+})
+
 export {
     createPlaylist,
     getUserPlaylists,
@@ -398,5 +468,6 @@ export {
     addVideoToPlaylist,
     removeVideoFromPlaylist,
     deletePlaylist,
-    updatePlaylist
+    updatePlaylist,
+    getPlaylistsByTitle
 }

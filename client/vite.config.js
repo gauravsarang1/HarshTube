@@ -14,5 +14,10 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
       '@theme': path.resolve(__dirname, './src/theme')
     }
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5050'
+    }
   }
 })

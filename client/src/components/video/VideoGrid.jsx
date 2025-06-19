@@ -47,18 +47,15 @@ const VideoGrid = ({
 
   if (error) {
     return (
-      
       <div className="flex flex-col justify-center items-center min-h-screen">
         <div className="text-red-500">{error}</div>
         <button
-                onClick={onClick}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Try Again
-          </button>
+          onClick={onClick}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
-       
-      
     );
   }
 
@@ -70,32 +67,41 @@ const VideoGrid = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Array.isArray(videos) && videos.map((video) => (
-            <Link
-              key={video._id}
-              to={`/watch/${video._id}`}
-              className="group"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <div className="relative aspect-video rounded-lg overflow-hidden">
-                <img
-                  src={video.thumbnail}
-                  alt={video.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-sm">
-                  {formatDuration(video.duration)}
+          {Array.isArray(videos) && videos.map((video) => {
+            const isNew = (() => {
+              if (!video.createdAt) return false;
+              const created = new Date(video.createdAt).getTime();
+              const now = Date.now();
+              return (now - created) < 24 * 60 * 60 * 1000;
+            })();
+            return (
+              <Link
+                key={video._id}
+                to={`/watch/${video._id}`}
+                className="group"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 shadow-lg group-hover:shadow-2xl transition-all duration-500">
+                  {isNew && (
+                    <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                      New
+                    </div>
+                  )}
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-sm">
+                    {formatDuration(video.duration)}
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
+                    <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </div>
                 </div>
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-                  <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                </div>
-              </div>
-              <div className="mt-2">
-                <h3 className="font-medium text-gray-900 dark:text-white line-clamp-2">
-                  {video.title}
-                </h3>
-                <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-2">
+                <div className="mt-2">
+                  <div className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">{video.title}</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     {video.owner?.avatar && (
                       <img
                         src={video.owner.avatar}
@@ -105,26 +111,20 @@ const VideoGrid = ({
                     )}
                     <span>{video.owner?.fullName || 'Unknown User'}</span>
                   </div>
-                  <span>•</span>
-                  <span>{video.views} {video.views === 1 ? 'view' : 'views'}</span>
-                  <span>•</span>
-                  <span>{formatDate(video.createdAt)}</span>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
-
-      {/* Loading Indicator */}
+      {/* Loading More Indicator */}
       {loadingMore && (
         <div className="flex justify-center py-8">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
         </div>
       )}
-
       {/* No More Videos Message */}
-      {!hasMore && Array.isArray(videos) && videos.length > 0 && (
+      {!hasMore && Array.isArray(videos) && videos.length > 0 && !loading && (
         <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
           No more videos to load
         </div>

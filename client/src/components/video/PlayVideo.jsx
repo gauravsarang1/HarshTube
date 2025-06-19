@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link ,useLocation} from 'react-router-dom';
 import axios from 'axios';
-import { ThumbsUp, MessageCircle, Share2, Clock, Eye, MoreVertical, ThumbsDown, Flag, BookmarkPlus, ChevronLeft, ChevronRight, Loader2, Minimize2 } from 'lucide-react';
+import { ThumbsUp, Play, Pause, MessageCircle, Share2, Clock, Eye, MoreVertical, ThumbsDown, Flag, BookmarkPlus, ChevronLeft, ChevronRight, Loader2, Minimize2 } from 'lucide-react';
 import Comments from '../comments/Comments';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsActive, setCurrentTime, setVideoSrc, setVideoId } from '../../features/body/miniPlayerSlice';
@@ -32,6 +32,7 @@ const PlayVideo = () => {
   const [totalSubscribers, setTotalSubscribers] = useState([]);
   const [totalSubscribersCount, setTotalSubscribersCount] = useState(0);
   const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   
   //const [subscriber, setSubscriber] = useState('');
 
@@ -202,6 +203,16 @@ const PlayVideo = () => {
       });
     }
   };
+
+  const togglePlayPause = () => {
+    if(isPlaying){
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }else{
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  }
 
   const getAllReactions = async () => {
     try {
@@ -480,6 +491,7 @@ const PlayVideo = () => {
                 controls
                 className="w-full h-full main-video"
                 poster={video.thumbnail}
+                autoPlay={isPlaying}
               />
               <button
                 onClick={() => openMiniPlayer(video.filePath)}
@@ -487,6 +499,41 @@ const PlayVideo = () => {
               >
                 <Minimize2 className="w-5 h-5 text-white" />
               </button>
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <button
+                  type="button"
+                  className="group/button relative flex items-center justify-center w-20 h-20 bg-black/70 backdrop-blur-md rounded-full opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 ease-out shadow-2xl border border-white/20 hover:bg-black/80 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-white/30"
+                  tabIndex={0}
+                  aria-label={isPlaying ? "Pause video" : "Play video"}
+                  onClick={togglePlayPause}
+                >
+                  {/* Ripple effect background */}
+                  <div className="absolute inset-0 rounded-full bg-white/10 scale-0 group-hover/button:scale-100 transition-transform duration-500 ease-out opacity-0 group-hover/button:opacity-100" />
+                  
+                  {/* Pulsing ring animation when playing */}
+                  {isPlaying && (
+                    <div className="absolute inset-0 rounded-full border-2 border-white/40 animate-ping" />
+                  )}
+                  
+                  {/* Icon container with enhanced styling */}
+                  <div className="relative z-10 flex items-center justify-center">
+                    {isPlaying ? (
+                      <Pause className="w-8 h-8 text-white drop-shadow-2xl filter group-hover/button:text-blue-100 transition-colors duration-200" />
+                    ) : (
+                      <Play className="w-8 h-8 text-white drop-shadow-2xl filter group-hover/button:text-blue-100 transition-colors duration-200 ml-1" />
+                    )}
+                  </div>
+                  
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Glowing effect on hover */}
+                  <div className="absolute inset-0 rounded-full shadow-lg shadow-blue-500/20 opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />
+                </button>
+                
+                {/* Background blur overlay for better contrast */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </div>
             </div>
 
             {/* Video Info */}
@@ -567,7 +614,7 @@ const PlayVideo = () => {
 
               {/* Channel Info */}
               <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
-                <div className="flex items-center gap-3">
+                <Link to={`/profile/${video.owner?.username}`} className="flex items-center gap-3">
                   {video.owner?.avatar && (
                     <img
                       src={video.owner.avatar}
@@ -586,7 +633,7 @@ const PlayVideo = () => {
                   <div className='flex items-center gap-1 py-2 px-4 bg-green-500 rounded-full'>
                     <span className='text-md text-white'>{totalSubscribersCount} subscribers</span>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={handleSubscribe}
                   className={`${isSubscribing ? 'bg-gray-300 cursor-not-allowed' : ''} ${isSubscribed ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'} px-4 py-2 rounded-full w-full md:w-auto`}>

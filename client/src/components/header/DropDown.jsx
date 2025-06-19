@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Moon, Sun, User, Settings, LogOut, Palette, Bell, Heart, History } from "lucide-react"
 import { Link } from "react-router-dom"
 
-const DropDown = ({ userData, handleTheme, handleLogout, handleSettings, handleProfile }) => {
+const DropDown = ({ userData, handleTheme, handleLogout, handleSettings, handleProfile, handleLikedVideos, handleWatchHistory }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -54,13 +54,13 @@ const DropDown = ({ userData, handleTheme, handleLogout, handleSettings, handleP
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <Link to="/liked-videos">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLikedVideos}>
               <Heart className="mr-2 h-4 w-4" />
               <span>Liked Videos</span>
             </DropdownMenuItem>
           </Link>
           <Link to="/watch-history">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleWatchHistory}>
               <History className="mr-2 h-4 w-4" />
               <span>Watch History</span>
             </DropdownMenuItem>

@@ -77,6 +77,25 @@ const LikedVideos = () => {
     fetchLikedVideos(1);
   }, [fetchLikedVideos]);
 
+
+  const clearAllLikedVideos = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete('http://localhost:5050/api/v1/likes/delete/all/liked-videos', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if(response.status === 200) {
+        setVideos([]);
+        setCurrentPage(1);
+        setHasMore(true);
+      }
+    } catch (err) {
+      console.error('Error clearing all liked videos:', err);
+    }
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.innerHeight + document.documentElement.scrollTop;

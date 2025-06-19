@@ -496,6 +496,23 @@ const getWatchHistory = asyncHandler(async(req, res) => {
 })
 
 
+const getUsersByUsername = asyncHandler(async(req, res) => {
+    const username = req.query.q;    
+    if(!username) {
+        throw new ApiError(400, 'Username is required');
+    }
+    console.log('username', username);
+
+    const users = await User.find({ username: { $regex: username, $options: 'i' } });
+    if(!users || users.length === 0) {
+        return res.status(200).json(new ApiResponse(200, [], 'No users found'));
+    }
+
+    return res.status(200)
+    .json(new ApiResponse(200, users, 'Users fetched successfully'));
+})
+
+
 export { 
     registerUser, 
     loginUser, 
@@ -507,5 +524,6 @@ export {
     updateAllDetails,
     getCurrentUser,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    getUsersByUsername
 }

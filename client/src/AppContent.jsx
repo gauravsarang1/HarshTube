@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Header from './components/header/Header';
+import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
+import Header from './components/header/header';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Profile from './components/profile/Profile';
@@ -16,6 +16,9 @@ import { setIsActive } from './features/body/miniPlayerSlice';
 import axios from 'axios';
 import AddToPlaylist from './components/playlist/AddToPlaylist';
 import Settings from './components/settings/Settings';
+import Result from './components/search/Result';
+import LikedVideos from './components/video/LikedVideos';
+import WatchHistory from './components/video/WatchHistory';
 
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -70,14 +73,6 @@ const AppContent = () => {
   const publicRoutes = ['/login', '/register'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
       {!isPublicRoute && <Header />}
@@ -96,6 +91,9 @@ const AppContent = () => {
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
           <Route path="/profile/:username" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
+          <Route path="/search" element={isAuthenticated ? <Result /> : <Navigate to="/login" />} />
+          <Route path="/liked-videos" element={isAuthenticated ? <LikedVideos /> : <Navigate to="/login" />} />
+          <Route path="/watch-history" element={isAuthenticated ? <WatchHistory /> : <Navigate to="/login" />} />
         </Routes>
       </main>
       {isActive && isAuthenticated && <MiniPlayer />}

@@ -65,7 +65,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     if(unLikeComment) {
         return res.status(200)
         .json(
-            new ApiResponse(200, null, 'Comment unliked successfully')
+            new ApiResponse(200, {type: 'unLike', owner: req.user._id}, 'Comment unliked successfully')
         )
     }
 
@@ -157,6 +157,19 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     }
 }
 )
+
+const deleteAllVideosLiked = asyncHandler(async (req, res) => {
+    await Like.deleteMany({
+        owner: req.user._id,
+        type: 'like',
+        video: {
+            $exists: true
+        }
+    })
+    return res.status(200).json(
+        new ApiResponse(200, null, 'All videos liked deleted successfully')
+    )
+})
 
 const getAllVideoLikes = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -370,5 +383,6 @@ export {
     getAllVideoLikes,
     getAllVideoDislikes,
     getAllCommentLikes,
-    getAllLikedVideos
+    getAllLikedVideos,
+    deleteAllVideosLiked
 }
