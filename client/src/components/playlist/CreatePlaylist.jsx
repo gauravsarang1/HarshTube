@@ -56,7 +56,7 @@ const CreatePlaylist = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-6"
@@ -65,15 +65,16 @@ const CreatePlaylist = () => {
         Back
       </button>
 
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+      <div className="max-w-2xl mx-auto bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-10 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+          <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
           Create New Playlist
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Name Input */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Playlist Name
             </label>
             <input
@@ -83,14 +84,14 @@ const CreatePlaylist = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="Enter playlist name"
             />
           </div>
 
           {/* Description Input */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Description
             </label>
             <textarea
@@ -100,31 +101,33 @@ const CreatePlaylist = () => {
               onChange={handleInputChange}
               required
               rows="4"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-500 resize-none"
               placeholder="Enter playlist description"
             />
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm">{error}</div>
+            <div className="text-red-500 text-sm font-semibold bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-2 border border-red-200 dark:border-red-700 shadow-sm">
+              {error}
+            </div>
           )}
 
           <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl font-semibold shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className={`px-4 py-2 rounded-lg text-white font-medium ${
-                loading
+              className={`px-8 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg
+                ${loading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-xl'}
+              `}
             >
               {loading ? (
                 <div className="flex items-center gap-2">

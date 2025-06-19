@@ -50,21 +50,41 @@ const Result = () => {
   }, [query]);
 
   if (!query) {
-    return <div className="text-center py-16 text-gray-500 dark:text-gray-400 text-xl font-semibold">Enter a search query.</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[40vh]">
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-blue-200 dark:border-blue-800 text-center">
+          <div className="text-xl font-semibold text-gray-600 dark:text-gray-300">Enter a search query.</div>
+        </div>
+      </div>
+    );
   }
   if (loading) {
-    return <div className="text-center py-16 text-blue-500 text-xl font-semibold">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[40vh]">
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-blue-200 dark:border-blue-800 text-center animate-pulse">
+          <div className="text-xl font-semibold text-blue-500 dark:text-blue-400">Loading...</div>
+        </div>
+      </div>
+    );
   }
   if (error) {
-    return <div className="text-center py-16 text-red-500 text-xl font-semibold">{error}</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[40vh]">
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-red-200 dark:border-red-800 text-center">
+          <div className="text-xl font-semibold text-red-500 dark:text-red-400">{error}</div>
+        </div>
+      </div>
+    );
   }
 
   const hasResults = users.length || videos.length || playlists.length;
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 pt-8">
       {!hasResults && (
-        <div className="text-center py-16 text-gray-500 dark:text-gray-400 text-xl font-semibold">
-          No results found.
+        <div className="flex justify-center items-center min-h-[40vh]">
+          <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-gray-200 dark:border-gray-800 text-center">
+            <div className="text-xl font-semibold text-gray-500 dark:text-gray-400">No results found.</div>
+          </div>
         </div>
       )}
       {users.length > 0 && <ResultUsers users={users} />}

@@ -150,12 +150,12 @@ const AddToPlaylist = ({onclick}) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-10 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="min-h-screen pt-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-lg"></div>
-              <div className="mt-2 space-y-2">
+            <div key={index} className="animate-pulse bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-4 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-xl"></div>
+              <div className="mt-4 space-y-3">
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </div>
@@ -167,17 +167,17 @@ const AddToPlaylist = ({onclick}) => {
   }
 
   return (
-    <div className="relative min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        
+    <div className="relative min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
       {/* Selected Video Container */}
-      <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="mb-8 max-w-2xl mx-auto bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+          <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
           Selected Video
         </h2>
         {selectedVideo ? (
           <div className="max-w-md">
             <div className="relative group">
-              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-md">
                 <img
                   src={selectedVideo.thumbnail}
                   alt={selectedVideo.title}
@@ -185,12 +185,12 @@ const AddToPlaylist = ({onclick}) => {
                 />
                 <button
                   onClick={() => setSelectedVideo(null)}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute top-2 right-2 p-1 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-full hover:scale-110 shadow-md transition-all duration-300"
                 >
                   <X size={16} />
                 </button>
               </div>
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+              <h3 className="mt-2 text-base font-semibold text-gray-900 dark:text-white line-clamp-2">
                 {selectedVideo.title}
               </h3>
             </div>
@@ -200,21 +200,21 @@ const AddToPlaylist = ({onclick}) => {
             No video selected. Select a video from below to add to your playlist.
           </p>
         )}
-        <div className="mt-4 flex justify-end gap-3">
+        <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={handleCancel}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-xl font-semibold shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving || !selectedVideo}
-            className={`px-4 py-2 rounded-lg text-white font-medium ${
-              saving || !selectedVideo
+            className={`px-8 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg
+              ${saving || !selectedVideo
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
-            }`}
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-xl'}
+            `}
           >
             {saving ? (
               <div className="flex items-center gap-2">
@@ -230,17 +230,18 @@ const AddToPlaylist = ({onclick}) => {
 
       {/* Uploaded Videos Grid */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+          <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
           Your Videos
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-2 gap-y-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-4 gap-y-6 max-w-4xl mx-auto">
           {uploadedVideos.map(video => (
             <div
               key={video._id}
               onClick={() => handleVideoSelect(video)}
-              className="relative group cursor-pointer max-w-[400px] mx-auto w-full"
+              className={`relative group cursor-pointer max-w-[400px] mx-auto w-full bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm p-2 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${selectedVideo?._id === video._id ? 'ring-2 ring-blue-500' : ''}`}
             >
-              <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <img
                   src={video.thumbnail}
                   alt={video.title}
@@ -248,13 +249,11 @@ const AddToPlaylist = ({onclick}) => {
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
                   {selectedVideo?._id === video._id ? (
-                    <Check className="w-8 h-8 text-white" />
-                  ) : (
-                    <Plus className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                  )}
+                    <Check className="w-10 h-10 text-green-500 bg-white rounded-full p-1 shadow-lg" />
+                  ) : null}
                 </div>
               </div>
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
+              <h3 className="mt-2 text-base font-semibold text-gray-900 dark:text-white line-clamp-2">
                 {video.title}
               </h3>
             </div>

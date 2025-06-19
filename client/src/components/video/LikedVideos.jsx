@@ -125,14 +125,13 @@ const LikedVideos = () => {
         </div>
         {isOwnProfile && (
           <button
-          onClick={() => clearAllLikedVideos()}
-          className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-2.5 bg-gray-800 dark:bg-gray-700 text-white rounded-xl hover:bg-gray-900 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md"
-        >
-          <Trash2 size={20} className="sm:size-5" />
-          <span className="text-sm sm:text-base font-medium">Clear All</span>
-        </button>
+            onClick={() => clearAllLikedVideos()}
+            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full shadow-md hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-300"
+          >
+            <Trash2 size={20} className="sm:size-5" />
+            <span className="text-sm sm:text-base font-medium">Clear All</span>
+          </button>
         )}
-        
       </div>
       <VideoGrid
         videos={videos}

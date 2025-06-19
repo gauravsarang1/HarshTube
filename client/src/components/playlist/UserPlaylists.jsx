@@ -202,11 +202,11 @@ const UserPlaylists = () => {
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {Array.from({ length: 8 }, (_, index) => (
-        <div key={index} className="animate-pulse">
-          <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-lg"></div>
-          <div className="mt-2 space-y-2">
+        <div key={index} className="animate-pulse bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-4 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+          <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-xl"></div>
+          <div className="mt-4 space-y-3">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
           </div>
@@ -217,25 +217,25 @@ const UserPlaylists = () => {
 
   // Header component
   const Header = () => (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
       <div className="flex flex-wrap items-center gap-3 md:gap-5">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
           {error ? 'My Playlists' : 'Your Playlists'}
         </h1>
-        <span className="text-sm sm:text-base font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
+        <span className="text-sm sm:text-base font-medium text-gray-600 dark:text-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 px-3 py-1.5 rounded-full">
           {playlistCount} playlists
         </span>
       </div>
       {isOwnProfile && (
         <Link
-        to="/create-playlist"
-        className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-2.5 bg-gray-800 dark:bg-gray-700 text-white rounded-xl hover:bg-gray-900 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md"
-      >
-        <Plus size={20} className="sm:size-5" />
-        <span className="text-sm sm:text-base font-medium">Add</span>
-      </Link>
+          to="/create-playlist"
+          className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+        >
+          <Plus size={20} className="sm:size-5" />
+          <span className="text-sm sm:text-base font-medium">Add</span>
+        </Link>
       )}
-      
     </div>
   );
 
@@ -248,11 +248,9 @@ const UserPlaylists = () => {
       <Link
         key={playlist._id}
         to={isEditing ? '#' : `/playlist/${playlist._id}`}
-        className="group relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-2xl"
-        onClick={isEditing ? (e) => e.preventDefault() : undefined}
+        className="group block bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm p-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
       >
-        {/* Thumbnail */}
-        <div className="relative aspect-video overflow-hidden">
+        <div className="relative aspect-video rounded-xl overflow-hidden shadow border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-blue-50/30 to-purple-50/10 dark:from-gray-800/30 dark:to-gray-900/10 mb-2">
           {playlist.PlaylistThumbnail ? (
             <img
               src={playlist.PlaylistThumbnail}
@@ -265,103 +263,57 @@ const UserPlaylists = () => {
               <Folder className="w-16 h-16 text-white opacity-60" />
             </div>
           )}
-          
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          
-          {/* Play button - only show when not editing */}
-          {!isEditing && (
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <Play className="w-14 h-14 text-white" />
+        </div>
+        <div className="flex flex-col gap-2">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={editPlaylistName}
+                onChange={e => setEditPlaylistName(e.target.value)}
+                className="flex-1 px-4 py-2 border-2 border-blue-200 dark:border-blue-700 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-400"
+                autoFocus
+              />
+              <button
+                onClick={() => handleUpdatePlaylistName(playlist._id)}
+                disabled={isUpdating}
+                className="p-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:scale-110 transition-all duration-300"
+              >
+                <Check size={18} />
+              </button>
+              <button
+                onClick={cancelEditing}
+                className="p-2 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md hover:scale-110 transition-all duration-300"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          ) : (
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2">
+              {playlist.name}
+            </h2>
+          )}
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <span>{playlist.videos?.length || 0} videos</span>
+            <span>•</span>
+            <span>{formatDate(playlist.createdAt)}</span>
+          </div>
+          {isOwner && !isEditing && (
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={e => { e.preventDefault(); startEditing(playlist); }}
+                className="p-2 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-md hover:scale-110 transition-all duration-300"
+              >
+                <Pencil size={18} />
+              </button>
+              <button
+                onClick={e => { e.preventDefault(); handleDeletePlaylist(playlist._id); }}
+                className="p-2 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md hover:scale-110 transition-all duration-300"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
           )}
-          
-          {/* Delete button - only show on hover and when owner */}
-          {isOwner && !isEditing && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                handleDeletePlaylist(playlist._id);
-              }}
-              className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg rounded-full p-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 hover:bg-white dark:hover:bg-gray-800"
-            >
-              <Trash2 className="w-5 h-5 text-red-500" />
-            </button>
-          )}
-        </div>
-
-        {/* Details */}
-        <div className="p-4">
-          <div className="flex justify-between items-center gap-2 mb-2">
-            {isEditing ? (
-              <div className="flex-1 flex items-center gap-2">
-                <input
-                  type="text"
-                  value={editPlaylistName}
-                  onChange={(e) => setEditPlaylistName(e.target.value)}
-                  className="flex-1 font-bold text-lg text-gray-900 dark:text-white bg-transparent border-b border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none"
-                  placeholder="Enter playlist name"
-                  disabled={isUpdating}
-                  autoFocus
-                />
-                <div className="flex gap-1">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleUpdatePlaylistName(playlist._id);
-                    }}
-                    disabled={isUpdating}
-                    className="bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white p-1.5 rounded-full transition-colors"
-                  >
-                    {isUpdating ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Check className="w-4 h-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      cancelEditing();
-                    }}
-                    disabled={isUpdating}
-                    className="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white p-1.5 rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate flex-1">
-                  {playlist.name}
-                </h3>
-                {isOwner && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      startEditing(playlist);
-                    }}
-                    className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
-                  >
-                    <Pencil className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs">
-              {Array.isArray(playlist.videos) ? playlist.videos.length : 0} videos
-            </span>
-            <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
-              {formatDate(playlist.createdAt)}
-            </span>
-          </div>
         </div>
       </Link>
     );
@@ -370,8 +322,11 @@ const UserPlaylists = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        <LoadingSkeleton />
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+        <div className="sm:max-w-7xl sm:mx-auto sm:bg-gradient-to-br sm:from-white sm:to-gray-50/80 sm:dark:from-gray-800 sm:dark:to-gray-900/80 sm:p-8 sm:rounded-2xl sm:shadow-xl sm:border sm:border-gray-200/50 sm:dark:border-gray-700/50 sm:backdrop-blur-sm">
+          <Header />
+          <LoadingSkeleton />
+        </div>
       </div>
     );
   }
@@ -379,63 +334,52 @@ const UserPlaylists = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        <Header />
-        <div className="text-center">
-          <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>
-          <button
-            onClick={() => fetchPlaylists(1)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+        <div className="sm:max-w-7xl sm:mx-auto sm:bg-gradient-to-br sm:from-white sm:to-gray-50/80 sm:dark:from-gray-800 sm:dark:to-gray-900/80 sm:p-8 sm:rounded-2xl sm:shadow-xl sm:border sm:border-gray-200/50 sm:dark:border-gray-700/50 sm:backdrop-blur-sm">
+          <Header />
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-red-500 dark:text-red-400 font-semibold text-lg mb-6">{error}</p>
+            <button
+              onClick={() => fetchPlaylists(1)}
+              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-10 px-4 sm:px-6 lg:px-8">
-      <Header />
-      
-      {/* Playlists Grid */}
-      {!isEmpty && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {playlists.map((playlist) => (
-            <PlaylistCard key={playlist._id} playlist={playlist} />
-          ))}
-        </div>
-      )}
-
-      {/* Loading More Indicator */}
-      {loadingMore && (
-        <div className="flex justify-center py-8">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-        </div>
-      )}
-
-      {/* No More Playlists Message */}
-      {!hasMore && playlistCount > 0 && (
-        <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-          No more playlists to load
-        </div>
-      )}
-
-      {/* Empty State */}
-      {isEmpty && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
-            No playlists found.
-          </p>
-          <Link
-            to="/create-playlist"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            <Plus size={20} />
-            Create Your First Playlist
-          </Link>
-        </div>
-      )}
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+      <div className="sm:max-w-7xl sm:mx-auto sm:bg-gradient-to-br sm:from-white sm:to-gray-50/80 sm:dark:from-gray-800 sm:dark:to-gray-900/80 sm:p-8 sm:rounded-2xl sm:shadow-xl sm:border sm:border-gray-200/50 sm:dark:border-gray-700/50 sm:backdrop-blur-sm">
+        <Header />
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-gray-500 dark:text-gray-400 text-lg mb-6">No playlists found.</p>
+            {isOwnProfile && (
+              <Link
+                to="/create-playlist"
+                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+              >
+                Create Playlist
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {playlists.map(playlist => (
+              <PlaylistCard key={playlist._id} playlist={playlist} />
+            ))}
+          </div>
+        )}
+        {loadingMore && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

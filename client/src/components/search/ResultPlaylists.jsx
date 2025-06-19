@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 
 const ResultPlaylists = ({ playlists = [] }) => {
   if (!playlists.length) {
-    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">No playlists found.</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[20vh]">
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-blue-200 dark:border-blue-800 text-center">
+          <div className="text-lg font-semibold text-gray-600 dark:text-gray-300">No playlists found.</div>
+        </div>
+      </div>
+    );
   }
   return (
     <div className="mb-8">

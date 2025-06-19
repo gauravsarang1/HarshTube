@@ -426,11 +426,11 @@ const PlayVideo = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="animate-pulse">
+              <div className="animate-pulse bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                 <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-lg"></div>
                 <div className="mt-4 space-y-4">
                   <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
@@ -440,7 +440,7 @@ const PlayVideo = () => {
             </div>
             <div className="space-y-4">
               {[...Array(5)].map((_, index) => (
-                <div key={index} className="animate-pulse">
+                <div key={index} className="animate-pulse bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-4 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                   <div className="flex gap-2">
                     <div className="bg-gray-200 dark:bg-gray-700 w-40 h-24 rounded"></div>
                     <div className="flex-1 space-y-2">
@@ -459,12 +459,12 @@ const PlayVideo = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-red-500 dark:text-red-400">{error}</p>
+          <p className="text-red-500 dark:text-red-400 font-semibold text-lg">{error}</p>
           <button
             onClick={fetchVideo}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
           >
             Try Again
           </button>
@@ -478,13 +478,13 @@ const PlayVideo = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Video Player */}
-            <div className="aspect-video group relative rounded-lg overflow-hidden bg-black">
+            <div className="aspect-video group relative rounded-2xl overflow-hidden bg-black shadow-xl border border-gray-200/50 dark:border-gray-700/50">
               <video
                 ref={videoRef}
                 src={video.filePath}
@@ -537,10 +537,13 @@ const PlayVideo = () => {
             </div>
 
             {/* Video Info */}
-            <div className="mt-4">
-              <h1 className="text-xl font-bold text-gray-900 line-clamp-2 text-ellipsis overflow-hidden dark:text-white">
-                {video.title}
-              </h1>
+            <div className="mt-6 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
+                <h1 className="text-2xl font-bold text-gray-900 line-clamp-2 text-ellipsis overflow-hidden dark:text-white">
+                  {video.title}
+                </h1>
+              </div>
 
               {/* Video Stats and Actions */}
               <div className="flex flex-wrap items-center justify-between mt-2 gap-4">
@@ -559,11 +562,11 @@ const PlayVideo = () => {
                 <div className="flex items-center gap-2">
                 <button
                     onClick={() => toggleVideoReaction('like')}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-full ${
-                      liked
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-sm
+                      ${liked
+                        ? 'bg-blue-500 text-white scale-105 shadow-lg'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900'}
+                    `}
                   >
                     <ThumbsUp size={16} />
                     <span>{videoLikes.length || 0}</span>
@@ -571,24 +574,24 @@ const PlayVideo = () => {
 
                   <button
                     onClick={() => toggleVideoReaction('disLike')}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-full ${
-                      disliked
-                        ? 'bg-red-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-sm
+                      ${disliked
+                        ? 'bg-red-500 text-white scale-105 shadow-lg'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900'}
+                    `}
                   >
                     <ThumbsDown size={16} />
                     <span>{videoDislikes.length || 0}</span>
                   </button>
                   <button
                     onClick={handleShare}
-                    className="flex items-center gap-1 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    className="flex items-center gap-1 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 font-semibold transition-all duration-300 shadow-sm"
                   >
                     <Share2 size={16} />
                     <span>Share</span>
                   </button>
                   <button
-                    className="flex items-center gap-1 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    className="flex items-center gap-1 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900 font-semibold transition-all duration-300 shadow-sm"
                   >
                     <BookmarkPlus size={16} />
                     <span>Save</span>
@@ -613,13 +616,13 @@ const PlayVideo = () => {
               </div>
 
               {/* Channel Info */}
-              <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
+              <div className="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
                 <Link to={`/profile/${video.owner?.username}`} className="flex items-center gap-3">
                   {video.owner?.avatar && (
                     <img
                       src={video.owner.avatar}
                       alt={video.owner.fullName}
-                      className="w-12 h-12 rounded-full"
+                      className="w-12 h-12 rounded-full shadow-md"
                     />
                   )}
                   <div className="flex-1 min-w-0">
@@ -630,108 +633,117 @@ const PlayVideo = () => {
                       {video.owner?.username || ''}
                     </p>
                   </div>
-                  <div className='flex items-center gap-1 py-2 px-4 bg-green-500 rounded-full'>
+                  <div className='flex items-center gap-1 py-2 px-4 bg-green-500 rounded-full shadow-md'>
                     <span className='text-md text-white'>{totalSubscribersCount} subscribers</span>
                   </div>
                 </Link>
                 <button
                   onClick={handleSubscribe}
-                  className={`${isSubscribing ? 'bg-gray-300 cursor-not-allowed' : ''} ${isSubscribed ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'} px-4 py-2 rounded-full w-full md:w-auto`}>
+                  className={`px-6 py-2 rounded-xl font-semibold transition-all duration-300 shadow-md
+                    ${isSubscribing ? 'bg-gray-300 cursor-not-allowed' : ''}
+                    ${isSubscribed ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'}
+                  `}
+                >
                   {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
                 </button>
               </div>
 
               {/* Description */}
-              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="mt-6 p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-xl shadow border border-gray-200/50 dark:border-gray-700/50">
                 <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap line-clamp-2 text-ellipsis overflow-hidden">
                   {video.description}
                 </p>
               </div>
 
               {/* Comments Section */}
-              <Comments videoId={videoId} />
+              <div className="mt-8">
+                <Comments videoId={videoId} />
+              </div>
             </div>
           </div>
 
           {/* Sidebar - Related Videos */}
           <div className="space-y-4 min-h-screen">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Related Videos
-            </h2>
-            <div 
-              className="related-videos space-y-4 min-hscreen overflow-y-auto pr-2"
-              style={{
-                scrollbarWidth: 'none',  /* Firefox */
-                msOverflowStyle: 'none',  /* IE and Edge */
-              }}
-            >
-              <style>
-                {`
-                  .related-videos::-webkit-scrollbar {
-                    display: none;  /* Chrome, Safari and Opera */
-                  }
-                `}
-              </style>
-              {relatedVideos.map((relatedVideo) => (
-                <Link
-                  key={relatedVideo._id}
-                  to={`/watch/${relatedVideo._id}`}
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="flex gap-3 group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 transition-all"
-                >
-                  {/* Thumbnail */}
-                  <div className="relative w-40 min-w-[180px] aspect-video rounded-lg overflow-hidden">
-                    <img
-                      src={relatedVideo.thumbnail}
-                      alt={relatedVideo.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                    />
-                    <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white px-1 py-0.5 rounded text-xs font-medium tracking-wide">
-                      {formatDuration(relatedVideo.duration)}
-                    </div>
-                  </div>
-
-                  {/* Video Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {relatedVideo.title}
-                    </h3>
-
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      <div className="flex items-center gap-1">
-                        {relatedVideo.owner?.avatar && (
-                          <img
-                            src={relatedVideo.owner.avatar}
-                            alt={relatedVideo.owner.fullName}
-                            className="w-4 h-4 rounded-full"
-                          />
-                        )}
-                        <span>{relatedVideo.owner?.fullName || 'Unknown'}</span>
-                      </div>
-                      <div className="flex gap-1 items-center mt-0.5">
-                        <span>{relatedVideo.views} views</span>
-                        <span>•</span>
-                        <span>{formatDate(relatedVideo.createdAt)}</span>
+            <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-6 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <span className="w-2 h-6 bg-gradient-to-b from-purple-500 to-blue-600 rounded-full" />
+                Related Videos
+              </h2>
+              <div 
+                className="related-videos space-y-4 min-hscreen overflow-y-auto pr-2"
+                style={{
+                  scrollbarWidth: 'none',  /* Firefox */
+                  msOverflowStyle: 'none',  /* IE and Edge */
+                }}
+              >
+                <style>
+                  {`
+                    .related-videos::-webkit-scrollbar {
+                      display: none;  /* Chrome, Safari and Opera */
+                    }
+                  `}
+                </style>
+                {relatedVideos.map((relatedVideo) => (
+                  <Link
+                    key={relatedVideo._id}
+                    to={`/watch/${relatedVideo._id}`}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="flex gap-3 group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 transition-all"
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative w-40 min-w-[180px] aspect-video rounded-lg overflow-hidden shadow-md">
+                      <img
+                        src={relatedVideo.thumbnail}
+                        alt={relatedVideo.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                      />
+                      <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white px-1 py-0.5 rounded text-xs font-medium tracking-wide">
+                        {formatDuration(relatedVideo.duration)}
                       </div>
                     </div>
+
+                    {/* Video Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {relatedVideo.title}
+                      </h3>
+
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        <div className="flex items-center gap-1">
+                          {relatedVideo.owner?.avatar && (
+                            <img
+                              src={relatedVideo.owner.avatar}
+                              alt={relatedVideo.owner.fullName}
+                              className="w-4 h-4 rounded-full"
+                            />
+                          )}
+                          <span>{relatedVideo.owner?.fullName || 'Unknown'}</span>
+                        </div>
+                        <div className="flex gap-1 items-center mt-0.5">
+                          <span>{relatedVideo.views} views</span>
+                          <span>•</span>
+                          <span>{formatDate(relatedVideo.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+
+                {/* Loading Indicator */}
+                {loadingMore && (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
                   </div>
-                </Link>
-              ))}
+                )}
 
-              {/* Loading Indicator */}
-              {loadingMore && (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                </div>
-              )}
-
-              {/* No More Videos Message */}
-              {!hasMore && relatedVideos.length > 0 && (
-                <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
-                  No more videos to load
-                </div>
-              )}
+                {/* No More Videos Message */}
+                {!hasMore && relatedVideos.length > 0 && (
+                  <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                    No more videos to load
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

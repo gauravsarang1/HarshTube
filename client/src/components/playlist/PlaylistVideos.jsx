@@ -132,12 +132,12 @@ const PlaylistVideos = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 ">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-lg"></div>
-              <div className="mt-2 space-y-2">
+            <div key={index} className="animate-pulse bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-4 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <div className="bg-gray-200 dark:bg-gray-700 aspect-video rounded-xl"></div>
+              <div className="mt-4 space-y-3">
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
               </div>
@@ -150,12 +150,12 @@ const PlaylistVideos = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p className="text-red-500 dark:text-red-400">{error}</p>
+      <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80 flex items-center justify-center">
+        <div className="max-w-md w-full bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm text-center">
+          <p className="text-red-500 dark:text-red-400 font-semibold text-lg">{error}</p>
           <button
             onClick={() => fetchPlaylistVideos(1)}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
           >
             Try Again
           </button>
@@ -165,114 +165,108 @@ const PlaylistVideos = () => {
   }
 
   return (
-    <div className="flex md:flex-row">
-        <div className="min-h-screen pt-10 mt-5 px-4 sm:px-6 lg:px-8 w-full">
+    <div className="flex md:flex-row min-h-screen pt-10 mt-5 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
+      <div className="w-full max-w-7xl mx-auto bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
         {/* Playlist Header */}
-        <div className="mb-8 flex justify-between items-center">
-            <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {playlist?.name || 'Playlist'}
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
+              {playlist?.name || 'Playlist'}
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-                {Array.isArray(videos) && videos.length} {Array.isArray(videos) && videos.length === 1 ? 'video' : 'videos'}
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">
+              {Array.isArray(videos) && videos.length} {Array.isArray(videos) && videos.length === 1 ? 'video' : 'videos'}
             </p>
-            </div>
-            {ownProfile && (
+          </div>
+          {ownProfile && (
             <button
-                onClick={() => setShowAddToPlaylist(true)}
-                className="hidden md:flex  gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={() => setShowAddToPlaylist(true)}
+              className="hidden md:flex gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
             >
-            <Plus size={20} />
-            Add Videos
+              <Plus size={20} />
+              Add Videos
             </button>
-            )}
-            <Link
-                to={`/playlist/${playlistId}/add-videos`}
-                className="flex md:hidden items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
+          )}
+          <Link
+            to={`/playlist/${playlistId}/add-videos`}
+            className="flex md:hidden items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+          >
             <Plus size={20} />
             Add Videos
-            </Link>
+          </Link>
         </div>
 
-        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-4 ${showAddToPlaylist?'lg:grid-cols-3 md:grid-cols-2':'lg:grid-cols-4 md:grid-cols-3'}`}>
-            {Array.isArray(videos) && videos.map((video) => (
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6 ${showAddToPlaylist?'lg:grid-cols-3 md:grid-cols-2':'lg:grid-cols-4 md:grid-cols-3'}`}>
+          {Array.isArray(videos) && videos.map((video) => (
             <Link
-                key={video._id}
-                to={`/watch/${video._id}`}
-                className="group max-w-[400px] mx-auto w-full"
+              key={video._id}
+              to={`/watch/${video._id}`}
+              className="group max-w-[400px] mx-auto w-full"
             >
-                <div className="relative aspect-video rounded-lg overflow-hidden">
+              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg border border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80">
                 <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  src={video.thumbnail}
+                  alt={video.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                 />
                 <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white px-2 py-1 rounded text-sm">
-                    {formatDuration(video.duration)}
+                  {formatDuration(video.duration)}
                 </div>
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-                    <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 </div>
-                </div>
-                <div className="mt-2">
-                <h3 className="font-medium text-gray-900 dark:text-white line-clamp-2">
-                    {video.title}
+              </div>
+              <div className="mt-3">
+                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 text-lg">
+                  {video.title}
                 </h3>
-                <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
                     {playlist.owner?.avatar && (
-                        <img
+                      <img
                         src={playlist.owner.avatar}
                         alt={playlist.owner.fullName}
-                        className="w-6 h-6 rounded-full"
-                        />
+                        className="w-6 h-6 rounded-full shadow"
+                      />
                     )}
                     <span>{playlist.owner?.fullName || 'Unknown User'}</span>
-                    </div>
-                    <span>•</span>
-                    <span>{video.views} {video.views === 1 ? 'view' : 'views'}</span>
-                    <span>•</span>
-                    <span>{formatDate(video.createdAt)}</span>
+                  </div>
+                  <span>•</span>
+                  <span>{video.views} {video.views === 1 ? 'view' : 'views'}</span>
+                  <span>•</span>
+                  <span>{formatDate(video.createdAt)}</span>
                 </div>
-                </div>
+              </div>
             </Link>
-            ))}
+          ))}
         </div>
 
         {/* Loading Indicator */}
         {loadingMore && (
-            <div className="flex justify-center py-8">
+          <div className="flex justify-center py-8">
             <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-            </div>
+          </div>
         )}
 
         {/* No More Videos Message */}
         {!hasMore && Array.isArray(videos) && videos.length > 0 && (
-            <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
             No more videos to load
-            </div>
+          </div>
         )}
 
         {/* Empty State */}
         {!loading && (!Array.isArray(videos) || videos.length === 0) && (
-            <div className="text-center py-12">
+          <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">This playlist is empty.</p>
-            {/*<button
-                onClick={() => navigate(`/playlist/${playlistId}/add-videos`)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mx-auto"
-            >
-                <Plus size={20} />
-                Add Videos
-            </button>*/}
-            </div>
+          </div>
         )}
-        </div>
-        {showAddToPlaylist && (
+      </div>
+      {showAddToPlaylist && (
         <AddToPlaylist
-            onclick={() => setShowAddToPlaylist(false)}
+          onclick={() => setShowAddToPlaylist(false)}
         />
-        )}
+      )}
     </div>
   );
 };

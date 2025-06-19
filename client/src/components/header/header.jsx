@@ -82,11 +82,12 @@ const Header = () => {
         handleSearch={handleSearch}
       />
 
-      <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-md z-40">
+      <header className="fixed top-0 left-0 right-0 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80 shadow-xl z-40 border-b border-gray-200 dark:border-gray-800 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">HarshTube</span>
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
+              <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">HarshTube</span>
             </Link>
 
             <DesktopSearch 

@@ -10,16 +10,16 @@ const AuthenticatedActions = ({
   navigate 
 }) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <Link 
         to="/upload" 
-        className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="p-2 text-blue-500 hover:text-white rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 shadow-md hover:bg-gradient-to-br hover:from-blue-500 hover:to-purple-600 transition-all duration-300"
       >
         <Upload size={24} />
       </Link>
       <button
         onClick={toggleThemeMode}
-        className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="p-2 text-yellow-500 hover:text-white rounded-full bg-gradient-to-br from-yellow-100 to-yellow-300 dark:from-yellow-900 dark:to-yellow-700 shadow-md hover:bg-gradient-to-br hover:from-yellow-400 hover:to-yellow-600 transition-all duration-300"
       >
         {darkMode ? <Sun size={24} /> : <Moon size={24} />}
       </button>

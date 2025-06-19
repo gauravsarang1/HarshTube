@@ -13,7 +13,7 @@ const TabContent = ({ activeTab }) => (
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="mt-4"
+      className="mt-4 rounded-2xl shadow-xl bg-white/80 dark:bg-gray-900/80 border border-blue-100 dark:border-blue-900 backdrop-blur-md p-4 md:p-8"
     >
       {activeTab === 'videos' && <UploadedVideos />}
       {activeTab === 'playlists' && <UserPlaylists />}

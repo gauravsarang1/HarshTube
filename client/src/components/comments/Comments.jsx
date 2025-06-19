@@ -65,14 +65,17 @@ const Comments = ({ videoId }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-8 border-2 border-blue-200 dark:border-blue-800 text-center animate-pulse">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-2" />
+          <div className="text-lg font-semibold text-blue-500 dark:text-blue-400">Loading comments...</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+      <h2 className="text-xl font-extrabold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow">
         Comments ({comments.length})
       </h2>
 
@@ -91,7 +94,7 @@ const Comments = ({ videoId }) => {
 
       {/* Error Message */}
       {error && (
-        <div className="text-red-500 dark:text-red-400 mb-4">
+        <div className="bg-white/80 dark:bg-gray-900/80 rounded-xl shadow px-4 py-3 border border-red-200 dark:border-red-700 text-red-500 dark:text-red-400 mb-4 text-center font-semibold">
           {error}
         </div>
       )}

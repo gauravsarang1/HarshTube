@@ -35,8 +35,10 @@ const CommentList = () => {
         />
       ))}
       {comments.length === 0 && (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          No comments yet. Be the first to comment!
+        <div className="flex justify-center items-center min-h-[10vh]">
+          <div className="bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-xl px-8 py-6 border-2 border-blue-200 dark:border-blue-800 text-center">
+            <div className="text-base font-semibold text-gray-600 dark:text-gray-300">No comments yet. Be the first to comment!</div>
+          </div>
         </div>
       )}
     </div>

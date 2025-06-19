@@ -8,7 +8,7 @@ const CommentItem = ({ commentId, onEdit, onDelete, onLike, onCancelEdit, format
   if (!comment) return null;
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow p-4 border border-blue-100 dark:border-blue-900 backdrop-blur-md transition-all duration-200">
       {comment.owner?.avatar && (
         <img
           src={comment.owner.avatar}
@@ -58,16 +58,16 @@ const CommentItem = ({ commentId, onEdit, onDelete, onLike, onCancelEdit, format
         <div className="mt-2 flex items-center gap-4">
           <button 
               onClick={() => onLike(comment._id)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 shadow-sm border focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 ${
                 comment.isLiked 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border-blue-400 dark:border-blue-700' 
+                  : 'bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 border-blue-100 dark:border-blue-900'
               }`}
           >
             <Heart size={16} />
             <span>Like {comment.totalLikes > 0 ? `${comment.totalLikes}` : ''}</span>
           </button>
-          <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 border border-blue-100 dark:border-blue-900 transition-all duration-200 shadow-sm">
             <MessageCircle size={16} />
             <span>Reply</span>
           </button>
