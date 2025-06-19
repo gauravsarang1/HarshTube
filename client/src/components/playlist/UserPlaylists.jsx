@@ -5,6 +5,8 @@ import { Play, Clock, Loader2, Folder, Plus, Trash2, Save, Pencil, X, Check } fr
 import CreatePlaylist from './CreatePlaylist';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const UserPlaylists = () => {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -64,7 +66,7 @@ const UserPlaylists = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:5050/api/v1/playlist/user/${username}/playlists?page=${page}`,
+        `${API_BASE_URL}/playlist/user/${username}/playlists?page=${page}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -128,7 +130,7 @@ const UserPlaylists = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:5050/api/v1/playlist/user/${playlistId}`, {
+      await axios.delete(`${API_BASE_URL}/playlist/user/${playlistId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -163,7 +165,7 @@ const UserPlaylists = () => {
       }
 
       await axios.patch(
-        `http://localhost:5050/api/v1/playlist/user/${playlistId}`,
+        `${API_BASE_URL}/playlist/user/${playlistId}`,
         { name: editPlaylistName.trim() },
         {
           headers: { Authorization: `Bearer ${token}` }

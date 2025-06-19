@@ -3,6 +3,8 @@ import { useNavigate, useParams, } from 'react-router-dom';
 import axios from 'axios';
 import { X, Loader2, Plus, Check, } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const AddToPlaylist = ({onclick}) => {
   const { playlistId } = useParams();
   const navigate = useNavigate();
@@ -59,7 +61,7 @@ const AddToPlaylist = ({onclick}) => {
       }
 
       const response = await axios.get(
-        `http://localhost:5050/api/v1/videos/all-uploaded-videos/${user.username}?page=${page}`,
+        `${API_BASE_URL}/videos/all-uploaded-videos/${user.username}?page=${page}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -126,7 +128,7 @@ const AddToPlaylist = ({onclick}) => {
       }
 
       const response = await axios.patch(
-        `http://localhost:5050/api/v1/playlist/add/${selectedVideo._id}/${playlistId}`,
+        `${API_BASE_URL}/playlist/add/${selectedVideo._id}/${playlistId}`,
         {},
         {
           headers: {

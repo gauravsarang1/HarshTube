@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Upload, X, Info } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+
 const UploadVideo = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -136,7 +138,7 @@ const UploadVideo = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5050/api/v1/videos/upload-Video',
+        `${API_BASE_URL}/videos/upload-Video`,
         formDataToSend,
         {
           headers: {
