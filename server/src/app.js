@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser'
 const app = express()
 
 app.use(cors({
-    origin:['https://harsh-tube-8jfr9riyg-gauravs-projects-dd9fd690.vercel.app', process.env.CORS_ORIGIN],
+    origin:['https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app', process.env.CORS_ORIGIN],
     credentials: true
 }))
 app.use(express.json())
