@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, User, Bell, Moon, Shield, LogOut, Save, Camera, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { fetchUserData } from './api';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -18,9 +19,10 @@ const Settings = () => {
   const [profileData, setProfileData] = useState({
     fullName: '',
     email: '',
-    bio: '',
+    avatar: '',
     currentPassword: '',
-    newPassword: ''
+    newPassword: '',
+    _id: ''
   });
 
   const handleLogout = () => {
@@ -34,6 +36,25 @@ const Settings = () => {
     { id: 'appearance', label: 'Appearance', icon: Moon, color: 'purple' },
     { id: 'privacy', label: 'Privacy', icon: Shield, color: 'orange' }
   ];
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      loadUserData(token);
+    }
+  }, [navigate]);
+
+  const loadUserData = async (token) => {
+    try {
+      const data = await fetchUserData(token);
+      setProfileData(data);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  
 
   const ModernToggle = ({ checked, onChange, disabled = false }) => (
     <label className="relative inline-flex items-center cursor-pointer">
@@ -63,9 +84,13 @@ const Settings = () => {
               </h3>
               <div className="flex items-center gap-6">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-xl">
-                    JD
-                  </div>
+                  {profileData.avatar ? (
+                    <img src={profileData.avatar} alt="Profile" className="w-24 h-24 rounded-full" />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-xl">
+                      JD
+                    </div>
+                  )}
                   <button className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Camera className="w-6 h-6 text-white" />
                   </button>
@@ -301,16 +326,16 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950/30 pt-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950/30 pt-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="relative">
-            <SettingsIcon className="w-10 h-10 text-gray-800 dark:text-gray-100" />
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+            <SettingsIcon className="w-8 h-8 text-gray-800 dark:text-gray-100" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
           </div>
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Settings
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your account preferences</p>
