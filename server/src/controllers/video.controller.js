@@ -103,32 +103,73 @@ const getAllUploadedVideos = asyncHandler(async(req, res) => {
     )
 })
 
-const allVideos = asyncHandler(async(req, res) => {
+const allVideos = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    // Use aggregation pipeline for more robust data fetching
+    const videoAggregation = Video.aggregate([
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        },
+        {
+            $unwind: '$ownerDetails' // Unwind to get owner details as an object
+        },
+        {
+            $sort: { createdAt: -1 } // Sort by creation date
+        },
+        {
+            $skip: skip
+        },
+        {
+            $limit: limit
+        },
+        {
+            $project: {
+                _id: 1,
+                filePath: 1,
+                thumbnail: 1,
+                title: 1,
+                description: 1,
+                duration: 1,
+                views: 1,
+                createdAt: 1,
+                owner: {
+                    _id: '$ownerDetails._id',
+                    username: '$ownerDetails.username',
+                    avatar: '$ownerDetails.avatar',
+                    fullName: '$ownerDetails.fullName'
+                }
+            }
+        }
+    ]);
+
     const [videos, total] = await Promise.all([
-        Video.find({})
-            .populate('owner', 'username avatar fullName')
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 }),
+        videoAggregation.exec(),
         Video.countDocuments({})
     ]);
 
-    return res.status(200)
-    .json(
-        new ApiResponse(200, {
-            videos,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            totalVideos: total,
-            hasMore: skip + videos.length < total
-        }, 'All Videos Fetched Successfully')
-    )
-})
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                videos,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+                totalVideos: total,
+                hasMore: skip + videos.length < total
+            },
+            'All Videos Fetched Successfully'
+        )
+    );
+});
 
 // ...existing code...
 
@@ -148,9 +189,14 @@ const getVideoById = asyncHandler(async(req, res) => {
         throw new ApiError(404, 'Video not found');
     }
 
-    if(req.user._id.toString() !== video.owner._id.toString()) {
-        video.views += 1; // Increment views only if the user is not the owner
-        await video.save({ validateBeforeSave: true });
+    // Increment views if a user is watching, but not the owner
+    if (req.user && req.user._id.toString() !== video.owner._id.toString()) {
+        video.views += 1;
+        await video.save({ validateBeforeSave: false });
+    } else if (!req.user) {
+        // Also increment for non-logged-in users
+        video.views += 1;
+        await video.save({ validateBeforeSave: false });
     }
 
     return res.status(200)

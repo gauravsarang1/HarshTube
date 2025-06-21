@@ -46,6 +46,6 @@ router.route('/update-all-details').post(verifyJwt, upload.none(), updateAllDeta
 router.route('/me').get(verifyJwt, getCurrentUser);
 router.route('/c/:username').get(verifyJwt, getUserChannelProfile);
 router.route('/watchHistory').get(verifyJwt, getWatchHistory);
-router.route('/search').get(verifyJwt, getUsersByUsername);
+router.route('/search').get(getUsersByUsername);
 
 export default router

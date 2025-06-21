@@ -154,9 +154,9 @@ const getAllComments = asyncHandler(async (req, res) => {
     // Now add isLiked and totalLikes in plain JS
     const enhancedComments = comments.map(comment => {
         const totalLikes = comment.likes.length;
-        const isLiked = comment.likes.some(like =>
+        const isLiked = req.user && req.user._id ? comment.likes.some(like =>
             like.owner.toString() === req.user._id.toString()
-        );
+        ) : false;
         return {
             ...comment,
             totalLikes,

@@ -1,14 +1,20 @@
-import { Search } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const MobileSearchButton = ({ onClick }) => {
   return (
-    <div
-      onClick={onClick}
-      className="flex items-center justify-center gap-2 px-4 py-2 w-32 rounded-xl border-2 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-200 bg-gradient-to-br from-white to-blue-50/80 dark:from-blue-900 dark:to-blue-950 shadow-md lg:hidden cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold"
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
-      <span className="text-md font-semibold">Search</span>
-      <Search size={20} />
-    </div>
+      <button
+        onClick={onClick}
+        className="flex items-center justify-center gap-2 px-4 py-2.5  transition-all duration-300 font-semibold group relative overflow-hidden lg:hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/50 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+        <Search size={24} className="relative text-purple-600 dark:text-purple-400 z-10 group-hover:scale-110 transition-transform duration-200" />
+      </button>
+    </motion.div>
   );
 };
 

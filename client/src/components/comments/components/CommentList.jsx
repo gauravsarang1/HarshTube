@@ -8,25 +8,18 @@ import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../utils/formatDate';
 import CommentItem from './CommentItem';
 
-const CommentList = () => {
+const CommentList = ({ comments, currentUser, loggedIn, onEdit, onDelete, onLike, onCancelEdit }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { comments, currentUser, submitType, commentlikedUser } = useSelector(state => state.comment);
-
-  const onEdit = (commentId) => handleEditComment(commentId, comments, dispatch);
-  const onDelete = (commentId) => handleDeleteComment(commentId, comments, dispatch, navigate);
-  const onLike = (commentId) => toggleCommentReaction(commentId, comments, commentlikedUser, dispatch, navigate);
-  const onCancelEdit = () => {
-    dispatch(setSubmitType({type: 'send', commentId: null}));
-    dispatch(setNewComment(''));
-  };
 
   return (
     <div className="space-y-6 ">
       {Array.isArray(comments) && comments.map((comment) => (
         <CommentItem
           key={comment._id}
-          commentId={comment._id}
+          comment={comment}
+          currentUser={currentUser}
+          loggedIn={loggedIn}
           onEdit={onEdit}
           onDelete={onDelete}
           onLike={onLike}

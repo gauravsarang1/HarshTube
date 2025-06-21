@@ -7,13 +7,9 @@ export async function fetchComments({ videoId, dispatch, navigate }) {
   try {
     dispatch(setLoading(true));
     const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    const response = await axios.get(`${API_BASE_URL}/comments/all/${videoId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    
+    const response = await axios.get(`${API_BASE_URL}/comments/all/${videoId}`, { headers });
     dispatch(setComments(response.data.data));
     dispatch(setError(null));
   } catch (err) {

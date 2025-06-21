@@ -84,16 +84,16 @@ const AppContent = () => {
           <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
           <Route path="/profile/:username" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/upload" element={isAuthenticated ? <UploadVideo /> : <Navigate to="/login" />} />
-          <Route path="/watch/:videoId" element={isAuthenticated ? <PlayVideo /> : <Navigate to="/login" />} />
-          <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
+          <Route path="/watch/:videoId" element={<PlayVideo />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/my-videos" element={isAuthenticated ? <UploadedVideos /> : <Navigate to="/login" />} />
           <Route path="/playlist/:playlistId" element={isAuthenticated ? <PlaylistVideos /> : <Navigate to="/login" />} />
           <Route path="/create-playlist" element={isAuthenticated ? <CreatePlaylist /> : <Navigate to="/login" />} />
           <Route path="/playlist/:playlistId/add-videos" element={isAuthenticated ? <AddToPlaylist /> : <Navigate to="/login" />} />
-          <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/home" />} />
           <Route path="/profile/:username" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
-          <Route path="/search" element={isAuthenticated ? <Result /> : <Navigate to="/login" />} />
+          <Route path="/search" element={<Result />} />
           <Route path="/liked-videos" element={isAuthenticated ? <LikedVideos /> : <Navigate to="/login" />} />
           <Route path="/watch-history" element={isAuthenticated ? <WatchHistory /> : <Navigate to="/login" />} />
         </Routes>

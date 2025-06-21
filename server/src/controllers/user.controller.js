@@ -501,7 +501,6 @@ const getUsersByUsername = asyncHandler(async(req, res) => {
     if(!username) {
         throw new ApiError(400, 'Username is required');
     }
-    console.log('username', username);
 
     const users = await User.find({ username: { $regex: username, $options: 'i' } });
     if(!users || users.length === 0) {

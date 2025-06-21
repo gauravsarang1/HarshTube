@@ -18,36 +18,34 @@ const Result = () => {
 
   useEffect(() => {
     if (!query) return;
+    
     const token = localStorage.getItem('token');
-    if(!token) {
-      navigate('/login');
-      return;
-    }
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    
     setLoading(true);
     setError(null);
+    
     Promise.all([
-      axios.get(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }),
-      axios.get(`${API_BASE_URL}/videos/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }),
-      axios.get(`${API_BASE_URL}/playlist/search?q=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      axios.get(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`, { headers }),
+      axios.get(`${API_BASE_URL}/videos/search?q=${encodeURIComponent(query)}`, { headers }),
+      axios.get(`${API_BASE_URL}/playlist/search?q=${encodeURIComponent(query)}`, { headers })
     ])
       .then(([usersRes, videosRes, playlistsRes]) => {
         setUsers(usersRes.data.data || []);
         setVideos(videosRes.data.data || []);
         setPlaylists(playlistsRes.data.data || []);
       })
-      .catch(() => setError('Failed to fetch search results.'))
+      .catch((err) => {
+        if (err.response?.status === 401) {
+          // Handle expired token gracefully
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setError('Please log in to see personalized search results.');
+        } else {
+          setError('Failed to fetch search results. Please try again later.');
+        }
+        console.error('Search error:', err);
+      })
       .finally(() => setLoading(false));
   }, [query]);
 
@@ -60,6 +58,7 @@ const Result = () => {
       </div>
     );
   }
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[40vh]">
@@ -69,6 +68,7 @@ const Result = () => {
       </div>
     );
   }
+  
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-[40vh]">

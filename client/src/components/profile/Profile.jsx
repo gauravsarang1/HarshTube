@@ -198,14 +198,14 @@ const Profile = () => {
         editCoverImage={editCoverImage} 
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 -mt-12 md:-mt-16">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-2xl shadow-xl p-8 md:p-12 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm"
+          className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-xl lg:rounded-2xl shadow-xl p-4 md:p-8 lg:p-12 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm"
         >
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
             <Avatar 
               user={user} 
               isOwnProfile={isOwnProfile} 
@@ -226,7 +226,7 @@ const Profile = () => {
                 isFullNameLoading={isFullNameLoading} 
                 isOwnProfile={isOwnProfile}
               />
-              <p className="text-gray-500 dark:text-gray-400">@{user.username}</p>
+              <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">@{user.username}</p>
               <ProfileStats user={user} />
               <ActionButtons isOwnProfile={isOwnProfile} handleLogout={handleLogout} />
             </div>

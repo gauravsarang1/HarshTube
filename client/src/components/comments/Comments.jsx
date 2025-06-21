@@ -13,17 +13,19 @@ import CommentList from './components/CommentList';
 import { useSelector, useDispatch } from 'react-redux';
 import { setComments, setLoading, setError, setSubmitType, setNewComment, setSubmitting, setCommentlikedUser, setCurrentUser, setVideoId } from '../../features/body/commentSlice';
 
-const Comments = ({ videoId }) => {
+const Comments = ({ videoId, loggedIn, currentUser }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { comments, loading, error, submitType, newComment, submitting, commentlikedUser, currentUser } = useSelector(state => state.comment);
+  const { comments, loading, error, submitType, newComment, submitting, commentlikedUser } = useSelector(state => state.comment);
  
 
   useEffect(() => {
     dispatch(setVideoId(videoId));
-    dispatch(setCurrentUser(JSON.parse(localStorage.getItem('user') || '{}')));
+    if (loggedIn && currentUser) {
+      dispatch(setCurrentUser(currentUser));
+    }
     fetchComments({ videoId, dispatch, navigate });
-  }, [videoId]);
+  }, [videoId, loggedIn, currentUser]);
 
   const handleToggleCommentReaction = async (commentId) => {
     try {
@@ -80,17 +82,23 @@ const Comments = ({ videoId }) => {
       </h2>
 
       {/* Comment Form */}
-      <CommentForm
-        newComment={newComment}
-        setNewComment={(val) => dispatch(setNewComment(val))}
-        submitting={submitting}
-        submitType={submitType}
-        onSubmit={(e) => handleSubmitComment(e, newComment, submitType, videoId, dispatch, navigate)}
-        onCancelEdit={() => {
-          dispatch(setSubmitType({type: 'send', commentId: null}));
-          dispatch(setNewComment(''));
-        }}
-      />
+      {loggedIn ? (
+        <CommentForm
+          newComment={newComment}
+          setNewComment={(val) => dispatch(setNewComment(val))}
+          submitting={submitting}
+          submitType={submitType}
+          onSubmit={(e) => handleSubmitComment(e, newComment, submitType, videoId, dispatch, navigate)}
+          onCancelEdit={() => {
+            dispatch(setSubmitType({type: 'send', commentId: null}));
+            dispatch(setNewComment(''));
+          }}
+        />
+      ) : (
+        <div className="bg-gray-800 p-4 rounded-lg text-center text-white mb-4">
+          <p>Please <a href="/login" className="text-blue-400 hover:underline">log in</a> to post a comment.</p>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -103,9 +111,10 @@ const Comments = ({ videoId }) => {
       <CommentList
         comments={comments}
         currentUser={currentUser}
+        loggedIn={loggedIn}
         onEdit={(commentId) => handleEditComment(commentId, comments, dispatch)}
         onDelete={(commentId) => handleDeleteComment(commentId, comments, dispatch, navigate)}
-        onLike={(commentId) => toggleCommentReaction(commentId, comments, commentlikedUser, dispatch, navigate)}
+        onLike={(commentId) => loggedIn ? handleToggleCommentReaction(commentId) : navigate('/login')}
         onCancelEdit={() => {
           dispatch(setSubmitType({type: 'send', commentId: null}));
           dispatch(setNewComment(''));

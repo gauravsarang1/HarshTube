@@ -28,11 +28,6 @@ const Home = () => {
 
       const token = localStorage.getItem('token');
       
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       const { videos: videoList, hasMore: more } = await fetchVideos(page, token);
 
       const randomVideos = videoList.sort(() => Math.random() - 0.5);
@@ -49,16 +44,17 @@ const Home = () => {
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
-        navigate('/login');
+        localStorage.removeItem('user');
       } else {
         setError('Failed to fetch videos. Please try again later.');
         console.error('Error fetching videos:', err);
       }
+      return;
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     loadVideos(1);

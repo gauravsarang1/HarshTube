@@ -2,9 +2,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Heart, MessageCircle, Pencil, Trash2, X } from 'lucide-react';
 
-const CommentItem = ({ commentId, onEdit, onDelete, onLike, onCancelEdit, formatDate }) => {
-  const { comments, currentUser, submitType } = useSelector(state => state.comment);
-  const comment = comments.find(c => c._id === commentId);
+const CommentItem = ({ comment, currentUser, loggedIn, onEdit, onDelete, onLike, onCancelEdit, formatDate }) => {
+  const { submitType } = useSelector(state => state.comment);
   if (!comment) return null;
 
   return (
@@ -26,7 +25,7 @@ const CommentItem = ({ commentId, onEdit, onDelete, onLike, onCancelEdit, format
               {formatDate(comment.createdAt)}
             </span>
           </div>
-          {currentUser && comment.owner?._id === currentUser.id && (
+          {loggedIn && currentUser && comment.owner?._id === currentUser.id && (
             <div className="flex items-center gap-2">
               <button 
                   onClick={() => onEdit(comment._id)}
@@ -63,6 +62,7 @@ const CommentItem = ({ commentId, onEdit, onDelete, onLike, onCancelEdit, format
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border-blue-400 dark:border-blue-700' 
                   : 'bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 border-blue-100 dark:border-blue-900'
               }`}
+              disabled={!loggedIn}
           >
             <Heart size={16} />
             <span>Like {comment.totalLikes > 0 ? `${comment.totalLikes}` : ''}</span>

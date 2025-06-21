@@ -16,10 +16,10 @@ router.route('/upload-Video').post(verifyJwt, upload.fields([
     }
 ]), uploadVideo);
 
-router.route('/search').get(verifyJwt, getVideosByTitle);
+router.route('/search').get(getVideosByTitle);
 router.route('/all-uploaded-videos/:username').get(verifyJwt, getAllUploadedVideos)
-router.route('/all-videos').get(verifyJwt,allVideos);
-router.route('/:videoId').get(verifyJwt, getVideoById);
+router.route('/all-videos').get(allVideos);
+router.route('/:videoId').get(getVideoById);
 router.route('/delete/:videoId').delete(verifyJwt, deleteVideo);
 
 
