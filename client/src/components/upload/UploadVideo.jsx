@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Upload, X, Info } from 'lucide-react';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -126,7 +127,8 @@ const UploadVideo = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Please login to upload videos');
+        showError('Please login to upload videos');
+        return;
       }
 
       const formDataToSend = new FormData();
@@ -149,10 +151,13 @@ const UploadVideo = () => {
       );
 
       if (response.data.statusCode === 200) {
+        showSuccess('Video uploaded successfully');
         navigate('/home');
+      } else {
+        showError(response.data.message);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload video');
+      showError(err.response?.data?.message || 'Failed to upload video');
     } finally {
       setLoading(false);
     }

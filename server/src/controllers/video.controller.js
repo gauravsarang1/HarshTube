@@ -221,11 +221,33 @@ const deleteVideo = asyncHandler(async(req, res) => {
     }
 
     try {
-        await deleteFromCloudinary(video.filePath, 'video');
+        if( video.filePath && video.filePath !== '') {
+            const cloudinaryUrl = video.filePath;
+            // Extract correct public_id
+            const relativePath = cloudinaryUrl.split('/upload/')[1]; // v1234/folder/filename.jpg
+            const segments = relativePath.split('/');
+            segments.shift(); // Remove version like "v12345678"
+            const publicId = segments.join('/').split('.')[0];
+    
+            console.log('✅ Correct publicId:', publicId);
+    
+            await deleteFromCloudinary(publicId, 'video');
+        }
+        if(video.thumbnail && video.thumbnail !== '') {
+            const cloudinaryUrl = video.thumbnail;
+            const relativePath = cloudinaryUrl.split('/upload/')[1];
+            const segments = relativePath.split('/');
+            segments.shift();
+            const publicId = segments.join('/').split('.')[0];
+
+            await deleteFromCloudinary(publicId, 'image');
+        }
     } catch (error) {
-        ApiError( 500, 'Failed to delete from Cloudinary');
+        throw new ApiError(500, 'Failed to delete video or thumbnail from Cloudinary');
+    } finally {
+        await video.deleteOne();
     }
-    await video.deleteOne()
+
 
     return res.status(200)
     .json(
@@ -250,11 +272,45 @@ const getVideosByTitle = asyncHandler(async(req, res) => {
     );
 })
 
+const getAllUserUploadedVideos = asyncHandler(async(req, res) => {
+
+    const user = req.user
+    if(!user) {
+        throw new ApiError(400, 'User ID is required');
+    }
+
+
+    const page = parseInt(req.query.page) || 1; // Current page number
+    const limit = parseInt(req.query.limit) || 10; // Videos per page
+    const skip = (page - 1) * limit;
+
+    const [videos, total] = await Promise.all([
+        Video.find({ owner: user._id })
+            .skip(skip)
+            .limit(limit)
+            .populate('owner', 'username avatar fullName'),
+        Video.countDocuments({ owner: user._id })
+    ]);
+
+    return res.status(200)
+    .json(
+        new ApiResponse(200, {
+            videos,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+            totalVideos: total,
+            hasMore: skip + videos.length < total
+        }, 'All uploaded Videos Fetched Successfully')
+    )
+})
+
 export {
     uploadVideo,
     getAllUploadedVideos,
     allVideos,
     getVideoById,
     deleteVideo,
-    getVideosByTitle
+    getVideosByTitle,
+    getAllUserUploadedVideos
 }

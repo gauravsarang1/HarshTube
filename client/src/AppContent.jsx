@@ -19,6 +19,7 @@ import Settings from './components/settings/Settings';
 import Result from './components/search/Result';
 import LikedVideos from './components/video/LikedVideos';
 import WatchHistory from './components/video/WatchHistory';
+import Toast from './components/ui/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -99,7 +100,7 @@ const AppContent = () => {
         </Routes>
       </main>
       {isActive && isAuthenticated && <MiniPlayer />}
-
+      <Toast />
     </div>
   );
 };

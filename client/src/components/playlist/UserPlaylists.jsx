@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Loader2, Folder, Plus, Trash2, Save, Pencil, X, Check, Music, TrendingUp, Eye, AlertTriangle } from 'lucide-react';
 import CreatePlaylist from './CreatePlaylist';
 import { motion, AnimatePresence } from 'framer-motion';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -50,6 +51,7 @@ const UserPlaylists = () => {
     const user = localStorage.getItem('user');
     if (!user) {
       navigate('/login');
+      showError('Please login to view your playlists');
       return;
     }
     setCurrentUser(JSON.parse(user));
@@ -85,6 +87,7 @@ const UserPlaylists = () => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
+        showError('Please login to view your playlists');
         return;
       }
 
@@ -94,6 +97,11 @@ const UserPlaylists = () => {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+      if(response.data.statusCode ===  200 || response.data.statusCode === 201) {
+        showSuccess('Playlists fetched successfully');
+      } else {
+        showError(response.data.message);
+      }
       
       const { playlists: playlistList, hasMore: more } = response.data.data;
       
@@ -114,8 +122,9 @@ const UserPlaylists = () => {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
         navigate('/login');
+        showError('Please login to view your playlists');
       } else {
-        setError('No playlists found');
+        showError('No playlists found');
         console.error('Error fetching playlists:', err);
       }
     } finally {
@@ -160,11 +169,13 @@ const UserPlaylists = () => {
       await axios.delete(`${API_BASE_URL}/playlist/user/${playlistId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      showSuccess('Playlist deleted successfully');
       
       // Optimistically update UI
       setPlaylists(prev => prev.filter(p => p._id !== playlistId));
     } catch (error) {
-      setError('Error deleting playlist');
+      showError('Error deleting playlist');
       console.error('Error deleting playlist:', error);
     }
   }, [navigate]);
@@ -188,6 +199,7 @@ const UserPlaylists = () => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
+        showError('Please login to update playlist name');
         return;
       }
 
@@ -198,6 +210,8 @@ const UserPlaylists = () => {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+
+      showSuccess('Playlist name updated successfully');
 
       // Optimistically update UI
       setPlaylists(prevPlaylists =>
@@ -211,7 +225,7 @@ const UserPlaylists = () => {
       cancelEditing();
     } catch (error) {
       console.error('Error updating playlist name:', error);
-      setError('Failed to update playlist name');
+      showError('Failed to update playlist name');
     } finally {
       setIsUpdating(false);
     }

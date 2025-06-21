@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Bell, Moon, Shield, LogOut, Save, Camera, Eye, EyeOff } from 'lucide-react';
+import { Settings as SettingsIcon, User, Bell, Moon, Shield, LogOut, Save, Camera, Eye, EyeOff, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { fetchUserData } from './api';
+import userApi from './api';
+import ManageVideos from './ManageVideos';
+import { showSuccess, showError } from '../../utils/toast';
 
 const Settings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account');
   const [darkMode, setDarkMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -32,6 +36,7 @@ const Settings = () => {
 
   const tabs = [
     { id: 'account', label: 'Account', icon: User, color: 'blue' },
+    { id: 'videos', label: 'Videos', icon: Video, color: 'red' },
     { id: 'notifications', label: 'Notifications', icon: Bell, color: 'green' },
     { id: 'appearance', label: 'Appearance', icon: Moon, color: 'purple' },
     { id: 'privacy', label: 'Privacy', icon: Shield, color: 'orange' }
@@ -47,14 +52,51 @@ const Settings = () => {
 
   const loadUserData = async (token) => {
     try {
-      const data = await fetchUserData(token);
+      const data = await userApi.fetchUserData(token);
       setProfileData(data);
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   };
 
-  
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true);
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await userApi.updateUserProfile(profileData, token);
+      showSuccess('Profile updated successfully');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      showError(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    setIsSavingPassword(true);
+    try {
+      const token = localStorage.getItem('token');
+      if(profileData.currentPassword === '' || profileData.newPassword === '') {
+        showError('Current password and new password are required');
+        return;
+      }
+      const response = await userApi.updateUserPassword(profileData.currentPassword, profileData.newPassword, token);
+      showSuccess('Password updated successfully');
+      // Clear password fields after successful update
+      setProfileData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: ''
+      }));
+    } catch (error) {
+      console.error('Error saving password:', error);
+      showError(error.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
 
   const ModernToggle = ({ checked, onChange, disabled = false }) => (
     <label className="relative inline-flex items-center cursor-pointer">
@@ -152,6 +194,18 @@ const Settings = () => {
               </div>
             </div>
 
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <button 
+                onClick={() => handleSaveProfile()}
+                className={`flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 ${isSavingProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSavingProfile}
+              >
+                <Save className="w-5 h-5" />
+                Save Changes
+              </button>
+            </div>
+
             {/* Password Section */}
             <div className="bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
               <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
@@ -197,13 +251,20 @@ const Settings = () => {
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <button className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <button 
+                onClick={() => handleSavePassword()}
+                className={`flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 ${isSavingPassword ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={isSavingPassword}
+              >
                 <Save className="w-5 h-5" />
                 Save Changes
               </button>
             </div>
           </div>
         );
+
+      case 'videos':
+        return <ManageVideos />;
 
       case 'notifications':
         return (
@@ -342,10 +403,9 @@ const Settings = () => {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Enhanced Sidebar */}
-          <div className="w-full lg:w-80 flex-shrink-0">
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 sticky top-8">
+        <div className="flex flex-col lg:flex-row gap-12">
+          <aside className="w-full lg:w-1/4 self-start lg:sticky lg:top-[150px]">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
               <nav className="space-y-2">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
@@ -382,7 +442,7 @@ const Settings = () => {
                 </div>
               </nav>
             </div>
-          </div>
+          </aside>
 
           {/* Main Content */}
           <div className="flex-1">

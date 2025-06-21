@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Loader2, Plus, Music, Eye, Calendar, User, AlertTriangle, ArrowLeft } from 'lucide-react';
 import AddToPlaylist from './AddToPlaylist';
 import { motion, AnimatePresence } from 'framer-motion';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -64,6 +65,7 @@ const PlaylistVideos = () => {
       
       if (!token) {
         navigate('/login');
+        showError('Please login to view this playlist');
         return;
       }
 
@@ -72,6 +74,11 @@ const PlaylistVideos = () => {
           Authorization: `Bearer ${token}`
         }
       });
+      if(response.data.statusCode === 200) {
+        showSuccess('Playlist videos fetched successfully');
+      } else {
+        showError(response.data.message);
+      }
       
       const { playlist, hasMore: more, totalVideos } = response.data.data;
       const {name, description, videos: videoList, owner } = playlist;

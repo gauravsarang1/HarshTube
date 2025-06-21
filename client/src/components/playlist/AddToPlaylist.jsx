@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { X, Loader2, Plus, Check, Music, Video, AlertTriangle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -46,7 +47,7 @@ const AddToPlaylist = ({ onclick }) => {
   const fetchUploadedVideos = async (page) => {
     try {
       if (!user) {
-        console.log('User is not available yet');
+        showError('User is not available yet');
         return;
       }
 
@@ -59,6 +60,7 @@ const AddToPlaylist = ({ onclick }) => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
+        showError('Please login to view your uploaded videos');
         return;
       }
 
@@ -70,7 +72,11 @@ const AddToPlaylist = ({ onclick }) => {
           }
         }
       );
-      console.log(response.data.data);
+      if(response.data.statusCode === 200 || response.data.statusCode === 201) {
+        showSuccess('Videos fetched successfully');
+      } else {
+        showError(response.data.message);
+      }
       const { videos, hasMore: more } = response.data.data;
 
       if (page === 1) {
@@ -90,8 +96,9 @@ const AddToPlaylist = ({ onclick }) => {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
         navigate('/login');
+        showError('Please login to view your uploaded videos');
       } else {
-        setError('Failed to fetch videos');
+        showError('Failed to fetch videos');
         console.error('Error fetching videos:', err);
       }
     } finally {
@@ -126,6 +133,7 @@ const AddToPlaylist = ({ onclick }) => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
+        showError('Please login to add video to playlist');
         return;
       }
 
@@ -138,13 +146,17 @@ const AddToPlaylist = ({ onclick }) => {
           }
         }
       );
-      console.log(response.data.data);
+      if(response.data.statusCode === 200 || response.data.statusCode === 201) {
+        showSuccess('Video added to playlist successfully');
+      } else {
+        showError(response.data.message);
+      }
       setSuccess(true);
       setTimeout(() => {
         onclick();
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add video to playlist');
+      showError(err.response?.data?.message || 'Failed to add video to playlist');
     } finally {
       setSaving(false);
     }

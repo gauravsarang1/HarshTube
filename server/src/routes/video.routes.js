@@ -1,4 +1,4 @@
-import { uploadVideo, getAllUploadedVideos, allVideos, getVideoById,deleteVideo, getVideosByTitle } from '../controllers/video.controller.js'
+import { uploadVideo, getAllUploadedVideos, allVideos, getVideoById,deleteVideo, getVideosByTitle, getAllUserUploadedVideos } from '../controllers/video.controller.js'
 import { verifyJwt } from '../middlewares/auth.middlewares.js'
 import { Router } from 'express'
 import { upload } from '../middlewares/multer.middlewares.js'
@@ -17,6 +17,7 @@ router.route('/upload-Video').post(verifyJwt, upload.fields([
 ]), uploadVideo);
 
 router.route('/search').get(getVideosByTitle);
+router.route('/all-uploaded-videos').get(verifyJwt, getAllUserUploadedVideos);
 router.route('/all-uploaded-videos/:username').get(verifyJwt, getAllUploadedVideos)
 router.route('/all-videos').get(allVideos);
 router.route('/:videoId').get(getVideoById);

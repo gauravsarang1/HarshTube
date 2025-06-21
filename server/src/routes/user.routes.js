@@ -39,7 +39,7 @@ router.route('/login').post(loginUser);
 //protected routes
 router.route('/logout').post( verifyJwt, logoutUser);
 router.route('/refreshToken').post(refreshAccessToken);
-router.route('/update-password').post(verifyJwt , updateCurrentPassword);
+router.route('/update-password').post(verifyJwt, upload.none(), updateCurrentPassword);
 router.route('/update-avatar').post(verifyJwt, upload.single('avatar'), updateCurrentAvatar);
 router.route('/update-coverImage').post(verifyJwt, upload.single('coverImage'), updateCurrentCoverImage);
 router.route('/update-all-details').post(verifyJwt, upload.none(), updateAllDetails);

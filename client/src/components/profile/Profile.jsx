@@ -39,6 +39,7 @@ import ActionButtons from './components/ActionButtons';
 import CoverImage from './components/CoverImage';
 import Avatar from './components/Avatar';
 import FullNameEditor from './components/FullNameEditor';
+import { showSuccess, showError } from '../../utils/toast';
 
 // Utils
 import { getAuthToken, handleAuthError } from './utils/auth';
@@ -77,8 +78,10 @@ const Profile = () => {
         const userData = await userApi.getProfile(username, token);
         setUser(userData.data);
         setFullName(userData.data.fullName);
+        showSuccess('Profile data loaded successfully');
       } catch (err) {
         setError(err.message || 'Failed to load profile data');
+        showError(err.message || 'Failed to load profile data');
       } finally {
         setIsLoading(false);
       }
@@ -94,7 +97,7 @@ const Profile = () => {
       if (!handleAuthError(navigate)) return;
 
       if (fullName?.trim() === '') {
-        setError('Full name cannot be empty');
+        showError('Full name cannot be empty');
         setIsFullNameLoading(false);
         return;
       }
@@ -104,10 +107,11 @@ const Profile = () => {
       if (response.statusCode === 201) {
         setFullNameDisabled(true);
         window.location.reload();
+        showSuccess('Full name updated successfully');
         setError('');
       }
     } catch (error) {
-      setError(error.message || 'Failed to edit full name');
+      showError(error.message || 'Failed to edit full name');
     } finally {
       setFullNameDisabled(true);
       setIsFullNameLoading(false);
@@ -121,7 +125,7 @@ const Profile = () => {
       if (!handleAuthError(navigate)) return;
 
       if (!coverImage) {
-        alert('Please select a cover image');
+        showError('Please select a cover image');
         setisEditCoverImage(false);
         setIsEditing(false);
         return;
@@ -132,10 +136,11 @@ const Profile = () => {
       if (response.statusCode === 200) {
         setisEditCoverImage(false);
         window.location.reload();
+        showSuccess('Cover image updated successfully');
         setError('');
       }
     } catch (err) {
-      setError(err.message || 'Failed to edit cover image');
+      showError(err.message || 'Failed to edit cover image');
     } finally {
       setisEditCoverImage(false);
       setIsEditing(false);
@@ -149,7 +154,7 @@ const Profile = () => {
       if (!handleAuthError(navigate)) return;
 
       if (!avatar) {
-        alert('Please select an avatar');
+        showError('Please select an avatar');
         setIsEditAvatar(false);
         setIsAvatarLoading(false);
         return;
@@ -160,10 +165,11 @@ const Profile = () => {
       if (response.statusCode === 200) {
         setIsEditAvatar(false);
         window.location.reload();
+        showSuccess('Avatar updated successfully');
         setError('');
       }
     } catch (err) {
-      setError(err.message || 'Failed to edit avatar');
+      showError(err.message || 'Failed to edit avatar');
     } finally {
       setIsEditAvatar(false);
       setIsAvatarLoading(false);
@@ -174,6 +180,7 @@ const Profile = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
+    showSuccess('Logged out successfully');
   };
 
   if (isLoading) return <LoadingSpinner />;

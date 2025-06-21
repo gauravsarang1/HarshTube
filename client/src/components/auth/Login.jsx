@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -30,14 +31,13 @@ const Login = () => {
         createdAt,
         updatedAt
        }
-       console.log( 'user', user);
-       
+       showSuccess('Login successful');
         localStorage.setItem('token', response.data.data.accessToken);
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/home');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      showError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

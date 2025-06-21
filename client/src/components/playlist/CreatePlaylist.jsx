@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Loader2, Music, Plus, Sparkles, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -35,6 +36,7 @@ const CreatePlaylist = () => {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
+        showError('Please login to create a playlist');
         return;
       }
 
@@ -53,11 +55,12 @@ const CreatePlaylist = () => {
         setSuccess(true);
         setTimeout(() => {
           navigate(-1);
+          showSuccess('Playlist created successfully');
         }, 1500);
       }
       console.log(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create playlist');
+      showError(err.response?.data?.message || 'Failed to create playlist');
     } finally {
       setLoading(false);
     }

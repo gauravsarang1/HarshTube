@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, Upload, X } from 'lucide-react';
+import { showSuccess, showError } from '../../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -85,10 +86,12 @@ const Register = () => {
       });
 
       if (response.data) {
+        showSuccess('Registration successful');
         localStorage.setItem('token', response.data.token);
         navigate('/');
       }
     } catch (err) {
+      showError(err.response?.data?.message || 'Registration failed. Please try again.');
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);

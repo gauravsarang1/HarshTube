@@ -220,6 +220,25 @@ const PlayVideo = () => {
     }
   }
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    // Set initial state
+    setIsPlaying(video.paused);
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
+  }, [videoRef.current]);
+
   const getAllReactions = async () => {
     if (!loggedIn) return;
     try {
