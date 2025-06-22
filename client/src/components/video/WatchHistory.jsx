@@ -37,6 +37,7 @@ const WatchHistory = () => {
       }
 
       const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
       
       if (!token) {
         navigate('/login');
@@ -58,8 +59,8 @@ const WatchHistory = () => {
       } else {
         // Ensure no duplicate videos are added
         setVideos(prev => {
-          const existingIds = new Set(prev.map(v => v._id));
-          const newVideos = videoList.filter(v => !existingIds.has(v._id));
+          const existingIds = new Set(prev.map(v => v.videoId || v._id));
+          const newVideos = videoList.filter(v => !existingIds.has(v.videoId || v._id));
           return [...prev, ...newVideos];
         });
       }
@@ -70,6 +71,7 @@ const WatchHistory = () => {
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         navigate('/login');
       } else {
         setError('Failed to fetch watch history. Please try again later.');
@@ -354,7 +356,7 @@ const WatchHistory = () => {
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
             {videos.map((video, index) => (
               <motion.div
-                key={video._id}
+                key={video._id || video.videoId}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
