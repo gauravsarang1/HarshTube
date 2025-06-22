@@ -50,7 +50,7 @@ const WatchHistory = () => {
         }
       });
 
-      console.log(response.data.data);
+      console.log(response.data);
       
       const { videos: videoList, hasMore: more } = response.data.data;
       

@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponce.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { hash } from "bcrypt";
+import mongoose from "mongoose";
 
 
 const addToWatchHistory = asyncHandler(async (req, res) => {
@@ -62,7 +63,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
 
     const watchHistory = await WatchHistory.aggregate([
         {
-            $match: { owner: req.user._id }
+            $match: { owner: new mongoose.Types.ObjectId(req.user._id) }
         },
         {
             $lookup: {
