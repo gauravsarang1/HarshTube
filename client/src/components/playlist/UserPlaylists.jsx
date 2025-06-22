@@ -49,13 +49,10 @@ const UserPlaylists = () => {
   // Initialize user authentication
   useEffect(() => {
     const user = localStorage.getItem('user');
-    if (!user) {
-      navigate('/login');
-      showError('Please login to view your playlists');
-      return;
+    if (user) {
+      setCurrentUser(JSON.parse(user));
     }
-    setCurrentUser(JSON.parse(user));
-  }, [navigate]);
+  }, []);
 
   // Calculate stats
   useEffect(() => {
@@ -85,17 +82,11 @@ const UserPlaylists = () => {
       }
 
       const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        showError('Please login to view your playlists');
-        return;
-      }
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.get(
         `${API_BASE_URL}/playlist/user/${username}/playlists?page=${page}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers }
       );
       if(response.data.statusCode ===  200 || response.data.statusCode === 201) {
         showSuccess('Playlists fetched successfully');
@@ -166,7 +157,7 @@ const UserPlaylists = () => {
         return;
       }
 
-      await axios.delete(`${API_BASE_URL}/playlist/user/${playlistId}`, {
+      await axios.delete(`${API_BASE_URL}/playlist/${playlistId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -204,7 +195,7 @@ const UserPlaylists = () => {
       }
 
       await axios.patch(
-        `${API_BASE_URL}/playlist/user/${playlistId}`,
+        `${API_BASE_URL}/playlist/${playlistId}`,
         { name: editPlaylistName.trim() },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -298,7 +289,7 @@ const UserPlaylists = () => {
                 <Music size={18} className="md:w-5 md:h-5 text-white" />
               </div>
               <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-800 dark:from-white dark:via-purple-200 dark:to-pink-200 bg-clip-text text-transparent">
-                My Playlists
+                Playlists
               </h1>
             </div>
             <motion.span 

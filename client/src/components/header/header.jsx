@@ -17,7 +17,7 @@ import MobileSearchButton from './components/MobileSearchButton';
 import AuthenticatedActions from './components/AuthenticatedActions';
 
 // Utils
-import { fetchUserData, logoutUser } from './utils/api';
+import { logoutUser } from './utils/api';
 
 // Header Component
 const Header = () => {
@@ -30,28 +30,59 @@ const Header = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
 
+  // Listen for authentication state changes from AppContent
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
-    if (token) {
-      loadUserData(token);
-    }
-  }, []);
+    const handleAuthChange = () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (token && user) {
+        setIsAuthenticated(true);
+        try {
+          const userData = JSON.parse(user);
+          setUserData(userData);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUserData(null);
+      }
+    };
 
-  const loadUserData = async (token) => {
-    try {
-      const data = await fetchUserData(token);
-      setUserData(data);
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
-  };
+    // Check auth state on mount and when storage changes
+    handleAuthChange();
+    
+    const handleStorageChange = (e) => {
+      if (e.key === 'token' || e.key === 'user') {
+        handleAuthChange();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom auth change events
+    window.addEventListener('authStateChanged', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('token');
       await logoutUser(token);
-      localStorage.removeItem('token');
+      
+      // Use global auth state clear function if available
+      if (window.clearAuthState) {
+        window.clearAuthState();
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      
       setIsAuthenticated(false);
       setUserData(null);
       navigate('/login');

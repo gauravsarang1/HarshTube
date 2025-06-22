@@ -5,9 +5,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 const api = {
   get: async (endpoint, token) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await axios.get(`${API_BASE_URL}${endpoint}`, { headers });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

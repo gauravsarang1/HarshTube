@@ -37,17 +37,9 @@ const UploadedVideos = () => {
       }
       
       const token = localStorage.getItem('token');
-      
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.get(`${API_BASE_URL}/videos/all-uploaded-videos/${username}?page=${pageNum}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axios.get(`${API_BASE_URL}/videos/all-uploaded-videos/${username}?page=${pageNum}`, { headers });
       
       const { videos: videoList, hasMore: more } = response.data.data;
       
@@ -142,7 +134,7 @@ const UploadedVideos = () => {
                     <Video size={18} className="md:w-5 md:h-5 text-white" />
                   </div>
                   <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
-                    My Uploaded Videos
+                    Uploaded Videos
                   </h1>
                 </div>
                 <motion.span 

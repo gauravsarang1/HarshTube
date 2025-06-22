@@ -676,7 +676,7 @@ const PlayVideo = () => {
                   ):(
                     <button
                       onClick={() => navigate('/login')}
-                      className="px-4 md:px-6 py-1.5 md:py-2 rounded-xl font-semibold transition-all duration-300 shadow-md bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm md:text-base"
+                      className="px-4 md:px-6 py-1.5 md:py-2 rounded-xl font-semibold transition-all duration-300 shadow-md bg-blue-500 text-white hover:bg-blue-700 text-sm md:text-base"
                     >
                       Login to Subscribe
                     </button>

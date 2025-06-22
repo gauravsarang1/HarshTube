@@ -68,12 +68,19 @@ const Profile = () => {
     setCurrentUser(user);
   }, []);
 
+  // Reset active tab to 'videos' for non-authenticated users
+  useEffect(() => {
+    const isAuthenticated = !!localStorage.getItem('token');
+    if (!isAuthenticated && activeTab !== 'videos' && activeTab !== 'playlists') {
+      setActiveTab('videos');
+    }
+  }, [activeTab, setActiveTab]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-        const token = getAuthToken();
-        if (!handleAuthError(navigate)) return;
+        const token = localStorage.getItem('token');
         
         const userData = await userApi.getProfile(username, token);
         setUser(userData.data);
@@ -241,7 +248,7 @@ const Profile = () => {
           <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} isOwnProfile={isOwnProfile} />
         </motion.div>
       </div>
-      <TabContent activeTab={activeTab} />
+      <TabContent activeTab={activeTab} isOwnProfile={isOwnProfile} />
     </motion.div>
   );
 };

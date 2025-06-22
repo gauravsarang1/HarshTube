@@ -196,6 +196,12 @@ export default function MiniPlayer() {
 
   if (!isActive) return null;
 
+  // Ensure we have a valid video source
+  if (!videoSrc) {
+    console.warn('MiniPlayer: No video source provided');
+    return null;
+  }
+
   return (
     <div
       ref={miniRef}

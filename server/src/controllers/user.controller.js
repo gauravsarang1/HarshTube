@@ -357,11 +357,10 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
         throw new ApiError(400, 'Username is empty')
     }
     
-    const userId = mongoose.Types.ObjectId.isValid(req.user._id)
+    // Handle case where user is not authenticated
+    const userId = req.user && mongoose.Types.ObjectId.isValid(req.user._id)
     ? new mongoose.Types.ObjectId(req.user._id)
     : null;
-
-    if (!userId) throw new ApiError(401, "Invalid user ID");
 
     const channel = await User.aggregate([
         {
@@ -380,7 +379,17 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 from: 'videos',
                 localField: '_id',
                 foreignField: 'owner',
-                as: 'videos'
+                as: 'videos',
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: 'likes',
+                            localField: '_id',
+                            foreignField: 'video',
+                            as: 'likes'
+                        }
+                    }
+                ]
             }
         },
         {
@@ -391,6 +400,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 as: 'subscribedTo'
             }
         },
+        
         {
             $addFields: {
                 subscribersCount: {
@@ -402,17 +412,48 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 totalVideos: {
                     $size: '$videos'
                 },
+                totalLikes: {
+                    $sum: {
+                        $map: {
+                            input: '$videos',
+                            as: 'video',
+                            in: {
+                                $size: {
+                                    $filter: {
+                                        input: '$$video.likes',
+                                        as: 'like',
+                                        cond: { $eq: ['$$like.type', 'like'] }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                totalViews: {
+                    $sum: {
+                        $map: {
+                            input: '$videos',
+                            as: 'video',
+                            in: '$$video.views'
+                        }
+                    }
+                },
                 isSubscribed: {
                     $cond: {
                         if: {
-                            $in: [
-                                userId,
+                            $and: [
+                                { $ne: [userId, null] },
                                 {
-                                    $map: {
-                                        input: '$subscribers',
-                                        as: 'sub',
-                                        in: '$$sub.subscriber'
-                                    }
+                                    $in: [
+                                        userId,
+                                        {
+                                            $map: {
+                                                input: '$subscribers',
+                                                as: 'sub',
+                                                in: '$$sub.subscriber'
+                                            }
+                                        }
+                                    ]
                                 }
                             ]
                         },
@@ -433,6 +474,8 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 channelSubscribedToCount: 1,
                 isSubscribed: 1,
                 totalVideos: 1,
+                totalLikes: 1,
+                totalViews: 1
             }
         }
     ]);

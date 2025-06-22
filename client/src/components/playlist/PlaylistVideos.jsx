@@ -32,9 +32,14 @@ const PlaylistVideos = () => {
   });
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if(user?.username === playlist.owner?.username) {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('token');
+    
+    // Only set ownProfile to true if user is authenticated AND owns the playlist
+    if (token && user && user.username === playlist.owner?.username) {
       setOwnProfile(true);
+    } else {
+      setOwnProfile(false);
     }
   }, [playlist]);
 
@@ -63,16 +68,10 @@ const PlaylistVideos = () => {
 
       const token = localStorage.getItem('token');
       
-      if (!token) {
-        navigate('/login');
-        showError('Please login to view this playlist');
-        return;
-      }
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.get(`${API_BASE_URL}/playlist/user/${playlistId}?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const response = await axios.get(`${API_BASE_URL}/playlist/${playlistId}?page=${page}`, {
+        headers
       });
       if(response.data.statusCode === 200) {
         showSuccess('Playlist videos fetched successfully');
@@ -107,7 +106,7 @@ const PlaylistVideos = () => {
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
-        navigate('/login');
+        localStorage.removeItem('user');
       } else {
         setError('Failed to fetch playlist videos. Please try again later.');
         console.error('Error fetching playlist videos:', err);

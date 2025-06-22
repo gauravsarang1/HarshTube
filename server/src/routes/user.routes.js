@@ -16,7 +16,7 @@ import {
 }
 from "../controllers/user.controller.js";
 import { upload } from '../middlewares/multer.middlewares.js'
-import { verifyJwt } from "../middlewares/auth.middlewares.js";
+import { verifyJwt, optionalAuth } from "../middlewares/auth.middlewares.js";
 
 const router = Router()
 
@@ -44,7 +44,7 @@ router.route('/update-avatar').post(verifyJwt, upload.single('avatar'), updateCu
 router.route('/update-coverImage').post(verifyJwt, upload.single('coverImage'), updateCurrentCoverImage);
 router.route('/update-all-details').post(verifyJwt, upload.none(), updateAllDetails);
 router.route('/me').get(verifyJwt, getCurrentUser);
-router.route('/c/:username').get(verifyJwt, getUserChannelProfile);
+router.route('/c/:username').get(optionalAuth, getUserChannelProfile);
 router.route('/watchHistory').get(verifyJwt, getWatchHistory);
 router.route('/search').get(getUsersByUsername);
 

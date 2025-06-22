@@ -126,14 +126,25 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
                 data: [
                     { $skip: skip },
                     { $limit: limit }
+                ],
+                totalCount: [
+                    { $count: "count" }
                 ]
-                
             }
         }
     ])
 
-    if(result.length === 0) {
-        throw new ApiError(404, 'no playlists found')
+    if(result.length === 0 || result[0].data.length === 0) {
+        return res.status(200)
+        .json(
+            new ApiResponse(200, {
+                playlists: [],
+                page,
+                limit,
+                totalPlaylists: 0,
+                hasMore: false
+            }, 'No playlists found')
+        )
     }
 
     return res.status(200)
@@ -143,7 +154,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
             page,
             limit,
             totalPlaylists: result[0]?.totalCount?.[0]?.count || 0,
-            hasMore: skip + result[0].data.length < result[0]?.totalCount?.[0]?.count || 0
+            hasMore: skip + result[0].data.length < (result[0]?.totalCount?.[0]?.count || 0)
         }, 'All user playlists fetched successfully')
     )
 })

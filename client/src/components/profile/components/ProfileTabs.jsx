@@ -3,10 +3,13 @@ import { motion } from 'framer-motion';
 import { Video, List, Heart, Clock } from 'lucide-react';
 
 const ProfileTabs = ({ activeTab, setActiveTab, isOwnProfile }) => {
+  // Check if user is authenticated
+  const isAuthenticated = !!localStorage.getItem('token');
+
   const allTabs = [
     { id: 'videos', label: 'Videos', icon: Video },
     { id: 'playlists', label: 'Playlists', icon: List },
-    ...(isOwnProfile ? [
+    ...(isOwnProfile && isAuthenticated ? [
       { id: 'liked videos', label: 'Liked Videos', icon: Heart },
       { id: 'watch history', label: 'Watch History', icon: Clock }
     ] : [])

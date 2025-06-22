@@ -18,7 +18,7 @@ router.route('/upload-Video').post(verifyJwt, upload.fields([
 
 router.route('/search').get(getVideosByTitle);
 router.route('/all-uploaded-videos').get(verifyJwt, getAllUserUploadedVideos);
-router.route('/all-uploaded-videos/:username').get(verifyJwt, getAllUploadedVideos)
+router.route('/all-uploaded-videos/:username').get(getAllUploadedVideos)
 router.route('/all-videos').get(allVideos);
 router.route('/:videoId').get(getVideoById);
 router.route('/delete/:videoId').delete(verifyJwt, deleteVideo);

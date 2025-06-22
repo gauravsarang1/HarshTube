@@ -32,8 +32,15 @@ const Login = () => {
         updatedAt
        }
        showSuccess('Login successful');
-        localStorage.setItem('token', response.data.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(user));
+       
+       // Use global auth state update function if available
+       if (window.updateAuthState) {
+         window.updateAuthState(response.data.data.accessToken, user);
+       } else {
+         localStorage.setItem('token', response.data.data.accessToken);
+         localStorage.setItem('user', JSON.stringify(user));
+       }
+       
         navigate('/home');
       }
     } catch (err) {
