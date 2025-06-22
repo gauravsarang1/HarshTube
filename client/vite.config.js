@@ -17,7 +17,7 @@ export default defineConfig({
   build: {
     outDir: 'dist'
   },
-  base: './', // ⚠️ SUPER IMPORTANT for routing to work correctly
+  base: './', // ⚠️ SUPER IMPORTANT for routing to work correctly.
   server: {
     proxy: {
       '/api': 'http://localhost:5050'
