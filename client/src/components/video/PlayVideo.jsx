@@ -35,6 +35,7 @@ const PlayVideo = () => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
+  const [watchHistoryAdded, setWatchHistoryAdded] = useState(false);
   
   //const [subscriber, setSubscriber] = useState('');
 
@@ -166,6 +167,8 @@ const PlayVideo = () => {
     if (loggedIn) {
       getAllReactions();
     }
+    // Reset watch history flag when video changes
+    setWatchHistoryAdded(false);
   }, [videoId, fetchRelatedVideos, loggedIn]);
 
   useEffect(() => {
@@ -224,7 +227,15 @@ const PlayVideo = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      // Add to watch history when video starts playing (only once per video)
+      if (!watchHistoryAdded && loggedIn) {
+        console.log('Video started playing, adding to watch history...');
+        addToWatchHistory(videoId);
+        setWatchHistoryAdded(true);
+      }
+    };
     const handlePause = () => setIsPlaying(false);
 
     video.addEventListener('play', handlePlay);
@@ -237,7 +248,7 @@ const PlayVideo = () => {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [videoRef.current]);
+  }, [videoRef.current, watchHistoryAdded, loggedIn, videoId]);
 
   const getAllReactions = async () => {
     if (!loggedIn) return;
@@ -429,7 +440,7 @@ const PlayVideo = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      await axios.post(`${API_BASE_URL}/users/watch-history/add/${videoId}`, {}, {
+      const response = await axios.post(`${API_BASE_URL}/watch-history/add/${videoId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -440,12 +451,6 @@ const PlayVideo = () => {
       console.error('Error adding to watch history:', err);
     }
   }
-
-  useEffect(() => {
-    if(videoId){
-      addToWatchHistory(videoId);
-    }
-  }, [videoId]);
 
   if (loading) {
     return (
