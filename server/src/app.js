@@ -5,9 +5,15 @@ import cookieParser from 'cookie-parser'
 const app = express()
 
 app.use(cors({
-    origin:['https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app', process.env.CORS_ORIGIN],
+    origin: [
+      'https://harsh-tube.vercel.app',
+      'https://harsh-tube-kmsb7zeke-gauravs-projects-dd9fd690.vercel.app',
+      'https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app',
+      process.env.CORS_ORIGIN // e.g. http://localhost:5173 for dev
+    ],
     credentials: true
-}))
+  }));
+  
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(express.static("public")) 
