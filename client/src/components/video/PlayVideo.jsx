@@ -36,6 +36,8 @@ const PlayVideo = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [watchHistoryAdded, setWatchHistoryAdded] = useState(false);
+  const [views, setViews] = useState(0);
+  const [isViewed, setIsViewed] = useState(false);
   const socket = useSocket();
   const {
     isSubscribed,
@@ -81,7 +83,7 @@ const PlayVideo = () => {
 
        setIsPlaying(!videoRef.current.paused && !videoRef.current.ended);
     }
-  }, [currentTime, lastVideoTime, isActive, navigate]);
+  }, [currentTime, lastVideoTime, isActive, navigate, videoRef?.current]);
 
   useEffect(() => {
     if(videoEnded && relatedVideos.length > 0){
@@ -127,6 +129,36 @@ const PlayVideo = () => {
     }
   };
 
+  const fetchViews = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await axios.get(`${API_BASE_URL}/views/${videoId}`, {headers});
+
+      const {totalViews, isViewed} = response.data.data;
+      setViews(totalViews);
+      setIsViewed(isViewed);
+    } catch (err) {
+      console.error('Error fetching views:', err);
+    }
+  }
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('views-updated', (data) => {
+      if (data.videoId === videoId) {
+        fetchViews();
+      }
+    });
+    return () => {
+      socket.off('views-updated', (data) => {
+        if (data.videoId === videoId) {
+          fetchViews();
+        }
+      });
+    };
+  }, [socket, videoId]);
+
   const fetchRelatedVideos = useCallback(async (page) => {
     try {
       setLoadingMore(true);
@@ -165,6 +197,7 @@ const PlayVideo = () => {
   useEffect(() => {
     fetchVideo();
     fetchRelatedVideos(1);
+    fetchViews();
     if (loggedIn) {
       getAllReactions();
     }
@@ -454,6 +487,25 @@ const PlayVideo = () => {
     }
   }
 
+  useEffect(() => {
+    const addView = async () => {
+      if (!loggedIn) return;
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+  
+        const response = await axios.post(`${API_BASE_URL}/views/add/${videoId}`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      } catch (err) {
+        console.error('Error adding view:', err);
+      }
+    }
+    addView();
+  }, [videoId, loggedIn]);
+
   if (loading) {
     return (
       <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
@@ -582,7 +634,7 @@ const PlayVideo = () => {
                 <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <Eye size={14} className="md:w-4 md:h-4" />
-                    <span>{video.views} views</span>
+                    <span>{views} views</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock size={14} className="md:w-4 md:h-4" />
