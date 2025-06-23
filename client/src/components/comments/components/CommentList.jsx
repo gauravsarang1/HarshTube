@@ -9,8 +9,6 @@ import { formatDate } from '../utils/formatDate';
 import CommentItem from './CommentItem';
 
 const CommentList = ({ comments, currentUser, loggedIn, onEdit, onDelete, onLike, onCancelEdit }) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-6 ">

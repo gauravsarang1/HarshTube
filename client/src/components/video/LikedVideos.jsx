@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import VideoGrid from './VideoGrid';
 import { Trash2, Heart, TrendingUp, Eye, Calendar, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const LikedVideos = () => {
   const [videos, setVideos] = useState([]);
@@ -37,22 +35,12 @@ const LikedVideos = () => {
         setLoadingMore(true);
       }
 
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/likes/get/user/liked-videos?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.get(`/likes/get/user/liked-videos?page=${page}`);
       
       console.log(response.data.data);
       
       const { videos: videoList, hasMore: more } = response.data.data;
+      console.log(videoList);
       
       if (page === 1) {
         setVideos(videoList);
@@ -70,7 +58,6 @@ const LikedVideos = () => {
       setError(null);
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
         navigate('/login');
       } else {
         setError('Failed to fetch liked videos. Please try again later.');
@@ -107,12 +94,7 @@ const LikedVideos = () => {
 
     try {
       setIsClearing(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.delete(`${API_BASE_URL}/likes/delete/all/liked-videos`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.delete('/likes/delete/all/liked-videos');
       if(response.status === 200) {
         setVideos([]);
         setCurrentPage(1);

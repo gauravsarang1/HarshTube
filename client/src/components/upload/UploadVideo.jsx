@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Upload, X, Info } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const UploadVideo = () => {
   const navigate = useNavigate();
@@ -125,34 +123,27 @@ const UploadVideo = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showError('Please login to upload videos');
-        return;
-      }
-
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('filePath', videoFile);
+      formDataToSend.append('videoFile', videoFile);
       if (thumbnailFile) {
         formDataToSend.append('thumbnail', thumbnailFile);
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/videos/upload-Video`,
+      const response = await api.post(
+        '/videos/upload-Video',
         formDataToSend,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (response.data.statusCode === 200) {
+      if (response.data.statusCode === 201) {
         showSuccess('Video uploaded successfully');
-        navigate('/home');
+        navigate(`/watch/${response.data.data._id}`);
       } else {
         showError(response.data.message);
       }

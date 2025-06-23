@@ -27,59 +27,65 @@ const toggleVideoReaction = asyncHandler(async (req, res) => {
     });
 
     // Toggle the same reaction
-    const removedSame = await Like.findOneAndDelete({
+    const wasRemoved = await Like.findOneAndDelete({
         owner: req.user._id,
         video: videoId,
         type: reactionType
     });
 
-    if (removedSame) {
+    let newReaction = null;
+    if (!wasRemoved) {
+        // If it wasn't removed, it means we need to create it
+        newReaction = await Like.create({
+            owner: req.user._id,
+            video: videoId,
+            type: reactionType
+        });
+    }
+
+    // Emit a socket event to all clients
+    const io = req.app.get('io');
+    io.emit('video-reaction-updated', { videoId });
+
+    if (wasRemoved) {
         return res.status(200).json(
-            new ApiResponse(200, null, `${reactionType} removed successfully`)
+            new ApiResponse(200, { removed: true }, `${reactionType} removed successfully`)
         );
     }
     
-    // Create new reaction
-    const newReaction = await Like.create({
-        owner: req.user._id,
-        video: videoId,
-        type: reactionType
-    });
-
     return res.status(201).json(
-        new ApiResponse(201, newReaction, `Video ${reactionType}d successfully`)
+        new ApiResponse(201, { created: newReaction }, `Video ${reactionType}d successfully`)
     );
 });
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
-    const {commentId} = req.params
+    const {commentId} = req.params;
+    const { videoId } = req.body;
     
-    if(!commentId) {
-        throw new ApiError(400, 'commentId id is required')
+    if(!commentId || !videoId) {
+        throw new ApiError(400, 'commentId and videoId are required')
     }
 
-    const unLikeComment = await Like.findOneAndDelete({
+    const like = await Like.findOne({
         owner: req.user._id,
         comment: commentId
-    })
-    if(unLikeComment) {
-        return res.status(200)
-        .json(
-            new ApiResponse(200, {type: 'unLike', owner: req.user._id}, 'Comment unliked successfully')
-        )
+    });
+
+    if (like) {
+        await Like.findByIdAndDelete(like._id);
+    } else {
+        await Like.create({
+            owner: req.user._id,
+            comment: commentId
+        });
     }
 
-    const likeComment = await Like.create({
-        owner: req.user._id,
-        comment: commentId
-    })
-    if(likeComment) {
-        return res.status(201)
-        .json(
-            new ApiResponse(201, likeComment,  'comment liked successfully')
-        )
-    }
-
+    const io = req.app.get('io');
+    io.emit('comment-reactions-updated', { commentId });
+    
+    return res.status(200).json(
+        new ApiResponse(200, { success: true }, 'Comment reaction toggled successfully')
+    )
 })
 
 const getAllCommentLikes = asyncHandler(async (req, res) => {

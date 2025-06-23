@@ -21,10 +21,27 @@ const toggleSubscription = asyncHandler(async(req, res) => {
         channel: channelId
     })
 
+    // Get updated subscriber count
+    const updatedSubscriberCount = await Subscription.countDocuments({
+        channel: channelId
+    });
+
+    // Emit socket event with complete information
+    const io = req.app.get('io');
+    io.emit('subscription-updated', {
+        channelId,
+        subscriberId: req.user._id.toString(),
+        isSubscribed: !deleteSubscription,
+        totalSubscribers: deleteSubscription ? updatedSubscriberCount : updatedSubscriberCount + 1
+    });
+
     if(deleteSubscription) {
         return res.status(200)
         .json(
-            new ApiResponse(200,null, 'Unsubscribed successfully')
+            new ApiResponse(200, {
+                totalSubscribers: updatedSubscriberCount,
+                isSubscribed: false
+            }, 'Unsubscribed successfully')
         )
     }
 
@@ -33,12 +50,14 @@ const toggleSubscription = asyncHandler(async(req, res) => {
         channel: channelId
     })
 
-    if(newSubscription) {
-        return res.status(201)
-        .json(
-            new ApiResponse(201,newSubscription,'subscribed Successfully')
-        )
-    }
+    return res.status(201)
+    .json(
+        new ApiResponse(201, {
+            subscription: newSubscription,
+            totalSubscribers: updatedSubscriberCount + 1,
+            isSubscribed: true
+        }, 'subscribed Successfully')
+    )
 });
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
@@ -55,7 +74,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
     const userId = req.user._id //mongoose.Types.ObjectId.isValid(req.user._id) ? new mongoose.Types.ObjectId(req.user._id): null;
 
-    const channel =  await Subscription.aggregate([
+    {/*const channel =  await Subscription.aggregate([
         {
             $match: {
                 channel: new mongoose.Types.ObjectId(channelId)
@@ -90,10 +109,10 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
                 avatar: '$subscriberDetails.avatar',
             }
         }
-    ])
+    ])*/}
 
     const totalSubscribers = await Subscription.countDocuments({
-        channel: userId
+        channel: channelId
     })
 
     const isSubscribed = await Subscription.exists({
@@ -104,7 +123,6 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     return res.status(200)
     .json(
         new ApiResponse(200, {
-            channel,
             totalSubscribers,
             isSubscribed: !!isSubscribed
         }, 'All Subscribers fetched successfully')

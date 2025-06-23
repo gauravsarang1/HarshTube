@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Check, X } from 'lucide-react';
 
@@ -60,4 +60,4 @@ const CoverImage = ({ user, isOwnProfile, isEditing, setisEditCoverImage, isedit
   </div>
 );
 
-export default CoverImage; 
+export default memo(CoverImage); 

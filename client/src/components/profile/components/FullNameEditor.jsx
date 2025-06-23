@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Edit, Check } from 'lucide-react';
 
@@ -85,4 +85,4 @@ const FullNameEditor = ({ fullName, setFullName, fullnameDisabled, setFullNameDi
   </div>
 );
 
-export default FullNameEditor; 
+export default memo(FullNameEditor); 

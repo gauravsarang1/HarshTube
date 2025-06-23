@@ -9,17 +9,28 @@ This is the backend server for the HarshTube application, built with Node.js and
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Tokens)
 - **File Upload**: Multer with Cloudinary integration
+- **Real-time Communication**: Socket.IO
+- **AI Integration**: OpenAI API
 - **Other Key Dependencies**:
   - bcrypt: For password hashing
   - cors: For handling Cross-Origin Resource Sharing
   - cookie-parser: For parsing cookies
   - mongoose-aggregate-paginate-v2: For pagination support
+  - socket.io: For real-time features
+  - openai: For AI-powered features
 
 ## Project Structure
 
 ```
 server/
 ├── src/              # Source code directory
+│   ├── controllers/  # Request handlers
+│   ├── models/       # Database models
+│   ├── routes/       # API routes
+│   ├── utils/        # Helper functions
+│   ├── middlewares/  # Custom middleware
+│   ├── socket/       # WebSocket handlers
+│   └── ai/           # AI integration
 ├── public/           # Public assets
 ├── node_modules/     # Dependencies
 ├── package.json      # Project configuration and dependencies
@@ -43,6 +54,8 @@ server/
    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   OPENAI_API_KEY=your_openai_api_key
+   CORS_ORIGIN=http://localhost:5173
    ```
 
 3. **Running the Server**
@@ -58,6 +71,46 @@ The server provides various endpoints for:
 - Video management (upload, update, delete)
 - User profile management
 - Comments and interactions
+- AI-powered features
+- Real-time updates
+
+## WebSocket Events
+
+The server implements real-time features using Socket.IO:
+
+### Subscription Events
+- `subscription-updated`: Emitted when a user subscribes/unsubscribes
+  ```javascript
+  {
+    channelId: String,
+    subscriberId: String,
+    isSubscribed: Boolean,
+    totalSubscribers: Number
+  }
+  ```
+
+### Comment Events
+- `comment-added`: New comment added
+- `comment-updated`: Comment edited
+- `comment-deleted`: Comment removed
+- `comment-reaction`: Like/dislike on comment
+
+### Video Events
+- `video-reaction`: Like/dislike on video
+- `video-view`: View count update
+
+## AI Features
+
+The server integrates with OpenAI's API for various AI-powered features:
+
+### Comment Enhancement
+- Smart comment suggestions
+- Content moderation
+- Sentiment analysis
+
+### Content Recommendations
+- Video recommendations based on user preferences
+- Trending content analysis
 
 ## Development
 
@@ -72,6 +125,8 @@ The server provides various endpoints for:
 - CORS enabled
 - Secure cookie handling
 - Environment variable management
+- WebSocket authentication
+- AI API key protection
 
 ## File Upload
 
@@ -88,6 +143,8 @@ The server implements comprehensive error handling for various scenarios includi
 - Authentication errors
 - File upload errors
 - API request validation
+- WebSocket connection errors
+- AI API errors
 
 ## Contributing
 

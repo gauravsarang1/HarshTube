@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Upload, Video, TrendingUp, Eye, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import VideoGrid from './VideoGrid';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const UploadedVideos = () => {
   const { username } = useParams();
@@ -36,10 +34,7 @@ const UploadedVideos = () => {
         setLoadingMore(true);
       }
       
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get(`${API_BASE_URL}/videos/all-uploaded-videos/${username}?page=${pageNum}`, { headers });
+      const response = await api.get(`/videos/all-uploaded-videos/${username}?page=${pageNum}`);
       
       const { videos: videoList, hasMore: more } = response.data.data;
       
@@ -60,7 +55,7 @@ const UploadedVideos = () => {
       setError(null);
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        // Interceptor will handle token removal, just need to redirect
         navigate('/login');
       } else {
         setError('Failed to fetch uploaded videos. Please try again later.');

@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import ResultUsers from './ResultUsers';
 import ResultVideos from './ResultVideos';
 import ResultPlaylists from './ResultPlaylists';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const Result = () => {
   const [users, setUsers] = useState([]);
@@ -19,16 +17,13 @@ const Result = () => {
   useEffect(() => {
     if (!query) return;
     
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    
     setLoading(true);
     setError(null);
     
     Promise.all([
-      axios.get(`${API_BASE_URL}/users/search?q=${encodeURIComponent(query)}`, { headers }),
-      axios.get(`${API_BASE_URL}/videos/search?q=${encodeURIComponent(query)}`, { headers }),
-      axios.get(`${API_BASE_URL}/playlist/search?q=${encodeURIComponent(query)}`, { headers })
+      api.get(`/users/search?q=${encodeURIComponent(query)}`),
+      api.get(`/videos/search?q=${encodeURIComponent(query)}`),
+      api.get(`/playlist/search?q=${encodeURIComponent(query)}`)
     ])
       .then(([usersRes, videosRes, playlistsRes]) => {
         setUsers(usersRes.data.data || []);

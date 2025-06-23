@@ -29,6 +29,17 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [isSparkleClicked, setIsSparkleClicked] = useState(false);
+
+  useEffect(() => {
+    // Initialize speech recognition
+    if (window.webkitSpeechRecognition) {
+      const SpeechRecognition = window.webkitSpeechRecognition;
+      window.mic = new SpeechRecognition();
+      window.mic.continuous = false;
+      window.mic.interimResults = false;
+    }
+  }, []);
 
   // Listen for authentication state changes from AppContent
   useEffect(() => {
@@ -105,6 +116,28 @@ const Header = () => {
     document.documentElement.classList.toggle('dark');
   };
 
+  const handleSparkle = () => {
+    setIsSparkleClicked(!isSparkleClicked);
+    if(!isSparkleClicked){
+      if (window.mic) {
+        window.mic.start();
+        window.mic.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          setSearchQuery(transcript);
+          setIsSparkleClicked(false);
+        };
+        window.mic.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsSparkleClicked(false);
+        };
+      }
+    } else {
+      if (window.mic) {
+        window.mic.stop();
+      }
+    }
+  };
+
   return (
     <>
       <SearchOverlay 
@@ -150,6 +183,8 @@ const Header = () => {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               handleSearch={handleSearch}
+              handleSparkle={handleSparkle}
+              isSparkleClicked={isSparkleClicked}
             />
 
             {/* Mobile Search Button */}

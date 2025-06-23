@@ -7,7 +7,7 @@ import { setIsActive, setCurrentTime, setVideoSrc, resetPlayer } from '../../fea
 export default function MiniPlayer() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isActive, currentTime, videoSrc, videoId, lastVideoTime } = useSelector(state => state.miniPlayer);
+  const { isActive, currentTime, videoSrc, videoId } = useSelector(state => state.miniPlayer);
   const videoRef = useRef(null);
   const miniRef = useRef(null);
   const animationRef = useRef(null);
@@ -22,11 +22,30 @@ export default function MiniPlayer() {
     playerHeight: 180
   });
 
+  // Set initial time when video loads
   useEffect(() => {
     if (currentTime && videoRef.current) {
       videoRef.current.currentTime = currentTime;
     }
   }, [currentTime]);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+
+    const saveCurrentTime = () => {
+      if (videoRef.current) {
+        dispatch(setCurrentTime(videoRef.current.currentTime));
+      }
+    };
+
+    videoRef.current.addEventListener('pause', saveCurrentTime);
+
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.removeEventListener('pause', saveCurrentTime);
+      }
+    };
+  }, [dispatch]);
 
   // Optimized smooth animation - only runs when NOT dragging
   const smoothMove = useCallback(() => {
@@ -186,11 +205,17 @@ export default function MiniPlayer() {
   };
 
   const handleMaximize = () => {
-    if (videoRef.current) {
-      dispatch(setCurrentTime(videoRef.current.currentTime));
-    }
+    if (!videoRef.current) return;
+    
+    const currentVideoTime = videoRef.current.currentTime;
+    dispatch(setCurrentTime(currentVideoTime));
+    videoRef.current.pause();
+    
+    // First update Redux state
     dispatch(setIsActive(false));
     dispatch(setVideoSrc(''));
+    
+    // Then navigate
     navigate(`/watch/${videoId}`);
   };
 

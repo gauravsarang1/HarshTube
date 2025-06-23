@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Video, Users, Eye, ThumbsUp } from 'lucide-react';
 
 const ProfileStats = ({ user }) => {
-  console.log(user);
   const stats = [
     {
       icon: Video,
@@ -92,4 +91,4 @@ const ProfileStats = ({ user }) => {
   );
 };
 
-export default ProfileStats; 
+export default memo(ProfileStats); 

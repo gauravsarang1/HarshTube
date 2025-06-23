@@ -112,7 +112,6 @@ const VideoGrid = ({
               const now = Date.now();
               return (now - created) < 24 * 60 * 60 * 1000;
             })();
-
             return (
               <motion.div
                 key={video._id}
@@ -122,7 +121,7 @@ const VideoGrid = ({
                 whileHover={{ scale: 1.02, y: -4 }}
               >
                 <Link
-                  to={`/watch/${video._id}`}
+                  to={`/watch/${video._id || video.videoId}`}
                   className="group block bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm overflow-hidden"
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 >

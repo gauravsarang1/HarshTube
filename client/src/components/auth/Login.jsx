@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toast';
+import { useDispatch } from 'react-redux';
+import { setCurrentUser } from '../../features/user/currentUserSlice';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
@@ -18,8 +20,9 @@ const Login = () => {
     try {
       setIsLoading(true);
       setError('');
+      console.log('trying to login');
       const response = await axios.post(`${API_BASE_URL}/users/login`, data);
-      if (response.data?.data?.accessToken && response.data?.data?.refreshToken && response.data?.data?.loggedInUser) {
+      if (response.data?.data?.accessToken && response.data?.data?.loggedInUser) {
        const {_id, username, fullName, email, coverImage, avatar, createdAt, updatedAt} = response.data.data.loggedInUser
        const user = {
         id: _id,
@@ -40,11 +43,13 @@ const Login = () => {
          localStorage.setItem('token', response.data.data.accessToken);
          localStorage.setItem('user', JSON.stringify(user));
        }
-       
+
         navigate('/home');
       }
     } catch (err) {
       showError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      console.log(err, 'error login');
+      
     } finally {
       setIsLoading(false);
     }

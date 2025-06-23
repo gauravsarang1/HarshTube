@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Loader2, Plus, Music, Eye, Calendar, User, AlertTriangle, ArrowLeft } from 'lucide-react';
 import AddToPlaylist from './AddToPlaylist';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showSuccess, showError } from '../../utils/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const PlaylistVideos = () => {
   const { playlistId } = useParams();
@@ -66,13 +64,7 @@ const PlaylistVideos = () => {
         setLoadingMore(true);
       }
 
-      const token = localStorage.getItem('token');
-      
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get(`${API_BASE_URL}/playlist/${playlistId}?page=${page}`, {
-        headers
-      });
+      const response = await api.get(`/playlist/${playlistId}?page=${page}`);
       if(response.data.statusCode === 200) {
         showSuccess('Playlist videos fetched successfully');
       } else {
@@ -107,6 +99,7 @@ const PlaylistVideos = () => {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        navigate('/login'); // Redirect to login on auth error
       } else {
         setError('Failed to fetch playlist videos. Please try again later.');
         console.error('Error fetching playlist videos:', err);

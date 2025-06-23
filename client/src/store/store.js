@@ -4,6 +4,7 @@ import sideBarReducer from '../features/header/sideBarSlice';
 import themeReducer from '../features/header/themeSlice';
 import miniPlayerReducer from '../features/body/miniPlayerSlice';
 import commentReducer from '../features/body/commentSlice';
+import currentUserReducer from '../features/user/currentUserSlice';
 
 const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
         themes: themeReducer,
         miniPlayer: miniPlayerReducer,
         comment: commentReducer,
+        currentUser: currentUserReducer,
     },
 });
 

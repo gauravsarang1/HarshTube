@@ -27,6 +27,7 @@
     "mongoose": "^8.15.1",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
     "multer": "^2.0.0",
-    "parser": "^0.1.4"
+    "parser": "^0.1.4",
+    "socket.io": "^4.8.1"
   }
 }

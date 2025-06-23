@@ -1,66 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
+import api from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, MessageCircle, Loader2, Trash2, Heart, Pencil, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { formatDate } from './utils/formatDate';
 import { fetchComments } from './utils/fetchComments';
 import { handleEditComment } from './utils/handleEditComment';
 import { handleDeleteComment } from './utils/handleDeleteComment';
-import { toggleCommentReaction } from './utils/toggleCommentReaction';
 import { handleSubmitComment } from './utils/handleSubmitComment';
 import CommentForm from './components/CommentForm';
 import CommentList from './components/CommentList';
 import { useSelector, useDispatch } from 'react-redux';
-import { setComments, setLoading, setError, setSubmitType, setNewComment, setSubmitting, setCommentlikedUser, setCurrentUser, setVideoId } from '../../features/body/commentSlice';
+import { useSocket } from '../../context/SocketContext';
+import { setSubmitType, setNewComment, setCurrentUser, setVideoId } from '../../features/body/commentSlice';
 
 const Comments = ({ videoId, loggedIn, currentUser }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { comments, loading, error, submitType, newComment, submitting, commentlikedUser } = useSelector(state => state.comment);
- 
-
+  const { comments, loading, error, submitType, newComment, submitting } = useSelector(state => state.comment);
+  const socket = useSocket();
+  // Initial fetch and user setup
   useEffect(() => {
     dispatch(setVideoId(videoId));
     if (loggedIn && currentUser) {
       dispatch(setCurrentUser(currentUser));
     }
     fetchComments({ videoId, dispatch, navigate });
-  }, [videoId, loggedIn, currentUser]);
+  }, [videoId, loggedIn, currentUser, dispatch]);
 
-  const handleToggleCommentReaction = async (commentId) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+  // Main socket listener for all comment-related updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCommentUpdate = (data) => {
+      // If the update is for the video we are currently watching, refetch the comments
+      if (data.videoId === videoId) {
+        console.log(`Comments updated for video ${videoId}, refetching...`);
+        fetchComments({ videoId, dispatch, navigate });
+      }
+    };
+
+    socket.on('comment-updated', handleCommentUpdate);
+
+    // Cleanup the listener when the component unmounts or videoId changes
+    return () => {
+      socket.off('comment-updated', handleCommentUpdate);
+    };
+  }, [socket, videoId, dispatch, navigate]);
+
+
+  // Handles the like button click
+  const handleLikeClick = async (commentId) => {
+    if (!loggedIn) {
         navigate('/login');
         return;
-      }
-
-      const response = await toggleCommentReaction(commentId, comments, commentlikedUser, dispatch, navigate);
-
-      const { type, owner } = response.data.data;
-
-      // Update the comments state to reflect the new like status
-      dispatch(setComments(prev => prev.map(comment => {
-        if (comment._id === commentId) {
-          return {
-            ...comment,
-            isLiked: type === 'like',
-            totalLikes: type === 'like' 
-              ? (comment.totalLikes || 0) + 1 
-              : Math.max((comment.totalLikes || 0) - 1, 0)
-          };
-        }
-        return comment;
-      })));
-
-      // Update the liked comments state
-      if (type === 'unLike') {
-        dispatch(setCommentlikedUser(prev => prev.filter(liked => liked.comment?._id !== commentId)));
-      } else {
-        dispatch(setCommentlikedUser(prev => [...prev, response.data.data]));
-      }
-    } catch (err) {
-      console.error('Error reacting to comment:', err);
+    }
+    try {
+      // Just send the request. The server will emit an event that triggers the refetch.
+      await api.post(
+        `/likes/toggle/c/${commentId}?reactionType=like`,
+        { videoId }, // Pass videoId so the server knows which video's comments to update
+      );
+    } catch (error) {
+      console.error('Failed to toggle comment like:', error);
+      // Optional: Add user-facing error message
     }
   };
 
@@ -114,7 +116,7 @@ const Comments = ({ videoId, loggedIn, currentUser }) => {
         loggedIn={loggedIn}
         onEdit={(commentId) => handleEditComment(commentId, comments, dispatch)}
         onDelete={(commentId) => handleDeleteComment(commentId, comments, dispatch, navigate)}
-        onLike={(commentId) => loggedIn ? handleToggleCommentReaction(commentId) : navigate('/login')}
+        onLike={handleLikeClick}
         onCancelEdit={() => {
           dispatch(setSubmitType({type: 'send', commentId: null}));
           dispatch(setNewComment(''));

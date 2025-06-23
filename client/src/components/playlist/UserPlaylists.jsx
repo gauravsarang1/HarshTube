@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Play, Clock, Loader2, Folder, Plus, Trash2, Save, Pencil, X, Check, Music, TrendingUp, Eye, AlertTriangle } from 'lucide-react';
 import CreatePlaylist from './CreatePlaylist';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showSuccess, showError } from '../../utils/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const UserPlaylists = () => {
   const { username } = useParams();
@@ -81,12 +79,8 @@ const UserPlaylists = () => {
         setLoadingMore(true);
       }
 
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get(
-        `${API_BASE_URL}/playlist/user/${username}/playlists?page=${page}`,
-        { headers }
+      const response = await api.get(
+        `/playlist/user/${username}/playlists?page=${page}`
       );
       if(response.data.statusCode ===  200 || response.data.statusCode === 201) {
         showSuccess('Playlists fetched successfully');
@@ -151,15 +145,7 @@ const UserPlaylists = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      await axios.delete(`${API_BASE_URL}/playlist/${playlistId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/playlist/${playlistId}`);
 
       showSuccess('Playlist deleted successfully');
       
@@ -169,7 +155,7 @@ const UserPlaylists = () => {
       showError('Error deleting playlist');
       console.error('Error deleting playlist:', error);
     }
-  }, [navigate]);
+  }, []);
 
   // Edit handlers
   const startEditing = useCallback((playlist) => {
@@ -187,19 +173,9 @@ const UserPlaylists = () => {
     
     setIsUpdating(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        showError('Please login to update playlist name');
-        return;
-      }
-
-      await axios.patch(
-        `${API_BASE_URL}/playlist/${playlistId}`,
-        { name: editPlaylistName.trim() },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      await api.patch(
+        `/playlist/${playlistId}`,
+        { name: editPlaylistName.trim() }
       );
 
       showSuccess('Playlist name updated successfully');
@@ -220,7 +196,7 @@ const UserPlaylists = () => {
     } finally {
       setIsUpdating(false);
     }
-  }, [editPlaylistName, navigate, cancelEditing]);
+  }, [editPlaylistName, cancelEditing]);
 
   // Format date helper
   const formatDate = useCallback((dateString) => {

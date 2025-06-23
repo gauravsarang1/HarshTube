@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Play, Loader2, Trash2, Clock, Eye, Calendar, TrendingUp, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -44,23 +44,18 @@ const WatchHistory = () => {
         return;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/watch-history/get/?page=${page}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.get(`/watch-history/get/?page=${page}`);
 
-      console.log(response.data);
-      
-      const { videos: videoList, hasMore: more } = response.data.data;
+      const videoHistory = response.data?.data?.videos || [];
+      const more = response.data?.data?.hasMore || false;
       
       if (page === 1) {
-        setVideos(videoList);
+        setVideos(videoHistory);
       } else {
         // Ensure no duplicate videos are added
         setVideos(prev => {
           const existingIds = new Set(prev.map(v => v.videoId || v._id));
-          const newVideos = videoList.filter(v => !existingIds.has(v.videoId || v._id));
+          const newVideos = videoHistory.filter(v => !existingIds.has(v.videoId || v._id));
           return [...prev, ...newVideos];
         });
       }
@@ -102,28 +97,18 @@ const WatchHistory = () => {
   }, [videos]);
 
   const clearAllWatchHistory = async () => {
-    if (!window.confirm('Are you sure you want to clear all watch history? This action cannot be undone.')) {
+    const confirm = window.confirm('Are you sure you want to clear your entire watch history? This action cannot be undone.');
+    if (!confirm) {
       return;
     }
 
     try {
       setIsClearing(true);
-      const token = localStorage.getItem('token');
-      if(!token) {
-        navigate('/login');
-        return;
-      }
-      const response = await axios.delete(`${API_BASE_URL}/watch-history/delete/all/watch-history`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if(response.status === 200) {
-        setVideos([]);
-        setCurrentPage(1);
-        setHasMore(true);
-        setStats({ totalViews: 0, totalDuration: 0, averageViews: 0 });
-      }
+      await api.delete('/watch-history/delete/all/watch-history');
+      setVideos([]);
+      setCurrentPage(1);
+      setHasMore(true);
+      setStats({ totalViews: 0, totalDuration: 0, averageViews: 0 });
     } catch (error) {
       console.error('Error clearing all watch history:', error);
     } finally {

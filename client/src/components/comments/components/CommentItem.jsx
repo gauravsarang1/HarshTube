@@ -1,9 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Heart, MessageCircle, Pencil, Trash2, X } from 'lucide-react';
+import fetchCommentLikes from '../utils/fetchCommentLikes';
+import { useSocket } from '../../../context/SocketContext';
+import { improveComment } from '../utils/commentImprover';
 
-const CommentItem = ({ comment, currentUser, loggedIn, onEdit, onDelete, onLike, onCancelEdit, formatDate }) => {
-  const { submitType } = useSelector(state => state.comment);
+const CommentItem = ({ comment, currentUser, loggedIn, onEdit, onDelete, onLike, onCancelEdit, formatDate}) => {
+  const { submitType} = useSelector(state => state.comment);
+  const [isLiked, setIsLiked] = useState(false);
+  const [totalLikes, setTotalLikes] = useState(comment.totalLikes || 0);
+  const [improvedComment, setImprovedComment] = useState(comment.content);
+  const socket = useSocket();
+
+  
+
+  const fetchLikes = async () => {
+    try {
+      const reactionData = await fetchCommentLikes({ commentId: comment._id });
+      setTotalLikes(reactionData.totalLikes);
+      setIsLiked(reactionData.isLiked);
+     
+    } catch (error) {
+      console.error('Error fetching comment likes:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (socket) {
+      const handleReactionUpdate = (data) => {
+        if (data.commentId === comment._id) {
+          fetchLikes();
+        }
+      };
+
+      socket.on('comment-reactions-updated', handleReactionUpdate);
+      
+      return () => {
+        socket.off('comment-reactions-updated', handleReactionUpdate);
+      };
+    }
+  }, [comment._id, socket, currentUser]);
+
+  useEffect(() => {
+    fetchLikes();
+  }, [comment._id]);
+
+  
+
   if (!comment) return null;
 
   return (
@@ -58,14 +101,14 @@ const CommentItem = ({ comment, currentUser, loggedIn, onEdit, onDelete, onLike,
           <button 
               onClick={() => onLike(comment._id)}
               className={`flex items-center gap-1 px-3 py-1 rounded-full transition-all duration-200 shadow-sm border focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 ${
-                comment.isLiked 
+                isLiked 
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border-blue-400 dark:border-blue-700' 
                   : 'bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 border-blue-100 dark:border-blue-900'
               }`}
               disabled={!loggedIn}
           >
             <Heart size={16} />
-            <span>Like {comment.totalLikes > 0 ? `${comment.totalLikes}` : ''}</span>
+            <span>Like {totalLikes > 0 ? `${totalLikes}` : ''}</span>
           </button>
           <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 border border-blue-100 dark:border-blue-900 transition-all duration-200 shadow-sm">
             <MessageCircle size={16} />

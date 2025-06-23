@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import { X, Loader2, Plus, Check, Music, Video, AlertTriangle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showSuccess, showError } from '../../utils/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const AddToPlaylist = ({ onclick }) => {
   const { playlistId } = useParams();
@@ -57,20 +55,8 @@ const AddToPlaylist = ({ onclick }) => {
         setLoadingMore(true);
       }
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        showError('Please login to view your uploaded videos');
-        return;
-      }
-
-      const response = await axios.get(
-        `${API_BASE_URL}/videos/all-uploaded-videos/${user.username}?page=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const response = await api.get(
+        `/videos/all-uploaded-videos/${user.username}?page=${page}`
       );
       if(response.data.statusCode === 200 || response.data.statusCode === 201) {
         showSuccess('Videos fetched successfully');
@@ -130,21 +116,8 @@ const AddToPlaylist = ({ onclick }) => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        showError('Please login to add video to playlist');
-        return;
-      }
-
-      const response = await axios.patch(
-        `${API_BASE_URL}/playlist/add/${selectedVideo._id}/${playlistId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const response = await api.patch(
+        `/playlist/add/${selectedVideo._id}/${playlistId}`
       );
       if(response.data.statusCode === 200 || response.data.statusCode === 201) {
         showSuccess('Video added to playlist successfully');

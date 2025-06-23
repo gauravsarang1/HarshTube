@@ -4,14 +4,17 @@ import axios from 'axios';
 import { ThumbsUp, Play, Pause, MessageCircle, Share2, Clock, Eye, MoreVertical, ThumbsDown, Flag, BookmarkPlus, ChevronLeft, ChevronRight, Loader2, Minimize2 } from 'lucide-react';
 import Comments from '../comments/Comments';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsActive, setCurrentTime, setVideoSrc, setVideoId } from '../../features/body/miniPlayerSlice';
+import { setIsActive, setCurrentTime, setVideoSrc, setVideoId} from '../../features/body/miniPlayerSlice';
+import { useSocket } from '../../context/SocketContext';
+import { setVideoTitle } from '../../features/body/commentSlice';
+import { useSubscription } from '../../hooks/useSubscription';
 
 const PlayVideo = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const { currentTime, isActive } = useSelector(state => state.miniPlayer);
+  const { currentTime, isActive, lastVideoTime } = useSelector(state => state.miniPlayer);
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,19 +26,24 @@ const PlayVideo = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isSubscribing, setIsSubscribing] = useState(false);
   const [reactionType, setReactionType] = useState('like');
   const [videoLikes, setVideoLikes] = useState([]);
   const [videoDislikes, setVideoDislikes] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [totalSubscribers, setTotalSubscribers] = useState([]);
   const [totalSubscribersCount, setTotalSubscribersCount] = useState(0);
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [watchHistoryAdded, setWatchHistoryAdded] = useState(false);
+  const socket = useSocket();
+  const {
+    isSubscribed,
+    subscriberCount,
+    loading: subscriptionLoading,
+    error: subscriptionError,
+    toggleSubscription
+  } = useSubscription(video?.owner?._id);
   
   //const [subscriber, setSubscriber] = useState('');
 
@@ -54,15 +62,26 @@ const PlayVideo = () => {
 
   useEffect(() => {
     if (videoRef.current) {
-      // First try to use currentTime from Redux
-      if (currentTime) {
+      // If coming from miniplayer, use lastVideoTime
+      if (lastVideoTime && !isActive) {
+        videoRef.current.currentTime = lastVideoTime;
+        console.log('lastVideoTime', lastVideoTime);
+      }
+      // Otherwise use currentTime if available
+      else if (currentTime) {
         videoRef.current.currentTime = currentTime;
+        console.log('currentTime', currentTime);
       }
-      if(!isActive){
-        videoRef.current.play();
+      
+      if (!isActive) {
+        videoRef.current.play().catch(err => {
+          console.log('Autoplay prevented:', err);
+        });
       }
+
+       setIsPlaying(!videoRef.current.paused && !videoRef.current.ended);
     }
-  }, [currentTime]);
+  }, [currentTime, lastVideoTime, isActive, navigate]);
 
   useEffect(() => {
     if(videoEnded && relatedVideos.length > 0){
@@ -72,7 +91,8 @@ const PlayVideo = () => {
         const nextVideoId = relatedVideos[0]._id;
         navigate(`/watch/${nextVideoId}`);
       }, 2000);
-      setVideoEnded(false); // Reset the flag
+      setVideoEnded(false);
+       // Reset the flag
     }
   },[videoEnded, relatedVideos])
 
@@ -88,28 +108,9 @@ const PlayVideo = () => {
       
       const videoData = response.data.data;
       setVideo(videoData);
+      dispatch(setVideoTitle(videoData.title));
       setError(null);
 
-      if (token && videoData?.owner?._id) {
-        // Fetch subscribers after video data is set
-        const subscribersResponse = await axios.get(
-          `${API_BASE_URL}/subscription/get/user/subscribers/${videoData.owner._id}`,
-          { headers }
-        );
-
-        const data = subscribersResponse?.data?.data;
-        const subscribers = data?.channel || [];
-        const tSubscribers = data?.totalSubscribers || 0;
-        const isSubscribed = data?.isSubscribed || false;
-        
-        setTotalSubscribers(subscribers);
-        if(isSubscribed && tSubscribers === 0) {
-          setTotalSubscribersCount(1);
-        } else {
-          setTotalSubscribersCount(tSubscribers);
-        }
-        setIsSubscribed(isSubscribed);
-      }
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('token');
@@ -170,6 +171,23 @@ const PlayVideo = () => {
     // Reset watch history flag when video changes
     setWatchHistoryAdded(false);
   }, [videoId, fetchRelatedVideos, loggedIn]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleReactionUpdate = (data) => {
+        if (data.videoId === videoId) {
+            console.log(`Reaction updated for video ${videoId}, refetching...`);
+            getAllReactions();
+        }
+    };
+
+    socket.on('video-reaction-updated', handleReactionUpdate);
+
+    return () => {
+        socket.off('video-reaction-updated', handleReactionUpdate);
+    };
+  }, [socket, videoId]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -242,7 +260,7 @@ const PlayVideo = () => {
     video.addEventListener('pause', handlePause);
 
     // Set initial state
-    setIsPlaying(video.paused);
+    setIsPlaying(true);
 
     return () => {
       video.removeEventListener('play', handlePlay);
@@ -311,8 +329,8 @@ const PlayVideo = () => {
         return;
       }
 
-      // Make API call first
-      const response = await axios.post(
+      // The server will emit an event that triggers a re-fetch
+      await axios.post(
         `${API_BASE_URL}/likes/toggle/v/${videoId}`,
         {},
         {
@@ -387,38 +405,22 @@ const PlayVideo = () => {
   };
 
   const handleSubscribe = async () => {
+    if (!loggedIn) {
+      navigate('/login');
+      return;
+    }
+    
     try {
-      setIsSubscribing(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-      
-      const response = await axios.post(
-        `${API_BASE_URL}/subscription/toggle/sub/${video.owner._id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      
-      //console.log(currentUser.id);
-      const subscriberId = response?.data?.data?.subscriber;
-
-      if(currentUser.id.includes(subscriberId)){
-        setIsSubscribed(true);
-      }else{
-        //setSubscriber('');
-        setIsSubscribed(false);
-      }
-      console.log( 'response', response.data.data);
-
+      await toggleSubscription();
     } catch (err) {
       console.error('Error subscribing:', err);
-      //setSubscriber('');
-    } finally {
-      setIsSubscribing(false);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setLoggedIn(false);
+        setCurrentUser(null);
+        navigate('/login');
+      }
     }
   };
 
@@ -427,9 +429,9 @@ const PlayVideo = () => {
       const currentVideoTime = videoRef.current.currentTime;
       dispatch(setVideoSrc(videoSrc));
       dispatch(setIsActive(true));
-      videoRef.current.pause();
       dispatch(setCurrentTime(currentVideoTime));
       dispatch(setVideoId(videoId));
+      videoRef.current.pause();
     }
   };
 
@@ -664,21 +666,22 @@ const PlayVideo = () => {
                     </p>
                   </div>
                   <div className='flex items-center gap-1 py-1.5 md:py-2 px-3 md:px-4 bg-green-500 rounded-full shadow-md'>
-                    <span className='text-xs md:text-sm text-white'>{totalSubscribersCount} subscribers</span>
+                    <span className='text-xs md:text-sm text-white'>{subscriberCount} subscribers</span>
                   </div>
                 </Link>
                 {
-                  loggedIn?(
+                  loggedIn ? (
                     <button
                       onClick={handleSubscribe}
+                      disabled={subscriptionLoading}
                       className={`px-4 md:px-6 py-1.5 md:py-2 rounded-xl font-semibold transition-all duration-300 shadow-md text-sm md:text-base
-                        ${isSubscribing ? 'bg-gray-300 cursor-not-allowed' : ''}
+                        ${subscriptionLoading ? 'bg-gray-300 cursor-not-allowed' : ''}
                         ${isSubscribed ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'}
                       `}
                     >
-                      {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                      {subscriptionLoading ? 'Loading...' : (isSubscribed ? 'Unsubscribe' : 'Subscribe')}
                     </button>
-                  ):(
+                  ) : (
                     <button
                       onClick={() => navigate('/login')}
                       className="px-4 md:px-6 py-1.5 md:py-2 rounded-xl font-semibold transition-all duration-300 shadow-md bg-blue-500 text-white hover:bg-blue-700 text-sm md:text-base"

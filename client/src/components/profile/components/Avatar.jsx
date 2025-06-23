@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Check, X } from 'lucide-react';
 
@@ -61,4 +61,4 @@ const Avatar = ({ user, isOwnProfile, isEditAvatar, setIsEditAvatar, setAvatar, 
   </motion.div>
 );
 
-export default Avatar; 
+export default memo(Avatar); 

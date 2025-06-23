@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/header/header';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -13,15 +13,15 @@ import CreatePlaylist from './components/playlist/CreatePlaylist';
 import MiniPlayer from './components/video/MiniPlayer';
 import { useSelector, useDispatch } from 'react-redux';
 import { setIsActive } from './features/body/miniPlayerSlice';
-import axios from 'axios';
+import axios from './api/axios';
 import AddToPlaylist from './components/playlist/AddToPlaylist';
 import Settings from './components/settings/Settings';
 import Result from './components/search/Result';
 import LikedVideos from './components/video/LikedVideos';
 import WatchHistory from './components/video/WatchHistory';
 import Toast from './components/ui/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
+import { setCurrentUser } from './features/user/currentUserSlice';
+import { showError } from './utils/toast';
 
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,93 +29,114 @@ const AppContent = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { isActive } = useSelector(state => state.miniPlayer);
+  const currentUser = useSelector(state => state.currentUser.currentUser);
 
   const clearAuthState = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    dispatch(setCurrentUser(null));
     setIsAuthenticated(false);
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('authStateChanged'));
   };
 
   const updateAuthState = (token, userData) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    dispatch(setCurrentUser(userData));
     setIsAuthenticated(true);
-    // Dispatch custom event to notify other components
     window.dispatchEvent(new CustomEvent('authStateChanged'));
   };
 
+  // Function to fetch fresh user data from the server
+  const fetchUserData = async (token) => {
+    try {
+      const response = await axios.get('/users/me');
+      const userData = {
+        id: response.data.data._id,
+        username: response.data.data.username,
+        fullName: response.data.data.fullName,
+        email: response.data.data.email,
+        coverImage: response.data.data.coverImage,
+        avatar: response.data.data.avatar,
+        createdAt: response.data.data.createdAt,
+        updatedAt: response.data.data.updatedAt
+      };
+      return userData;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeAuth = async () => {
       try {
+        setIsLoading(true);
         const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
         
         if (!token) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
+          clearAuthState();
           return;
         }
 
-        const user = localStorage.getItem('user');
-        
-        // If we have both token and user data, we can be confident the user is authenticated
-        if (user) {
+        let userData;
+        if (storedUser) {
           try {
-            const userData = JSON.parse(user);
-            if (userData && userData.id) {
-              setIsAuthenticated(true);
-              setIsLoading(false);
-              return;
-            }
+            userData = JSON.parse(storedUser);
+            // Temporarily set the stored user data while we fetch fresh data
+            dispatch(setCurrentUser(userData));
+            setIsAuthenticated(true);
           } catch (parseError) {
+            console.error('Error parsing stored user data:', parseError);
             clearAuthState();
-            setIsLoading(false);
             return;
           }
         }
 
-        const response = await axios.get(`${API_BASE_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.data.data) {
-          // Store the user data for future use
-          const userData = {
-            id: response.data.data._id,
-            username: response.data.data.username,
-            fullName: response.data.data.fullName,
-            email: response.data.data.email,
-            coverImage: response.data.data.coverImage,
-            avatar: response.data.data.avatar,
-            createdAt: response.data.data.createdAt,
-            updatedAt: response.data.data.updatedAt
-          };
-          localStorage.setItem('user', JSON.stringify(userData));
-          setIsAuthenticated(true);
-        } else {
-          clearAuthState();
+        // Always fetch fresh user data from the server
+        try {
+          const freshUserData = await fetchUserData(token);
+          updateAuthState(token, freshUserData);
+        } catch (error) {
+          console.error('Error fetching fresh user data:', error);
+          if (error?.response?.status === 401) {
+            clearAuthState();
+            showError('Session expired. Please login again.');
+          } else {
+            showError('Error loading user data. Please try again later.');
+          }
         }
-      } catch (err) {
+      } catch (error) {
+        console.error('Error during auth initialization:', error);
         clearAuthState();
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkAuth();
+    initializeAuth();
 
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = (e) => {
       if (e.key === 'token' || e.key === 'user') {
-        checkAuth();
+        initializeAuth();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
+    
+    // Listen for network status changes
+    const handleOnline = () => {
+      if (isAuthenticated) {
+        initializeAuth(); // Refresh user data when coming back online
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('online', handleOnline);
     };
   }, []);
 

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -41,22 +40,24 @@ import Avatar from './components/Avatar';
 import FullNameEditor from './components/FullNameEditor';
 import { showSuccess, showError } from '../../utils/toast';
 
+// Hooks
+import { useUserProfile } from '../../hooks/useUserProfile';
+
 // Utils
-import { getAuthToken, handleAuthError } from './utils/auth';
 import { userApi } from './utils/api';
 
 const Profile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState({});
+  const { user, isLoading, error, fullName, setFullName } = useUserProfile(username);
+  
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState('videos');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  
+  // State for editing UI
   const [coverImage, setCoverImage] = useState(null);
   const [iseditCoverImage, setisEditCoverImage] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [fullName, setFullName] = useState('');
   const [fullnameDisabled, setFullNameDisabled] = useState(true);
   const [isFullNameLoading, setIsFullNameLoading] = useState(false);
   const [avatar, setAvatar] = useState(null);
@@ -64,87 +65,46 @@ const Profile = () => {
   const [isEditAvatar, setIsEditAvatar] = useState(false);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-  }, []);
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    setCurrentUser(storedUser);
 
-  // Reset active tab to 'videos' for non-authenticated users
-  useEffect(() => {
     const isAuthenticated = !!localStorage.getItem('token');
     if (!isAuthenticated && activeTab !== 'videos' && activeTab !== 'playlists') {
       setActiveTab('videos');
     }
-  }, [activeTab, setActiveTab]);
+  }, [activeTab]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
-        
-        const userData = await userApi.getProfile(username, token);
-        setUser(userData.data);
-        setFullName(userData.data.fullName);
-        showSuccess('Profile data loaded successfully');
-      } catch (err) {
-        setError(err.message || 'Failed to load profile data');
-        showError(err.message || 'Failed to load profile data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [username]);
-
-  const editFullName = async () => {
+  const editFullName = useCallback(async () => {
     try {
       setIsFullNameLoading(true);
-      const token = getAuthToken();
-      if (!handleAuthError(navigate)) return;
-
       if (fullName?.trim() === '') {
         showError('Full name cannot be empty');
-        setIsFullNameLoading(false);
         return;
       }
-
-      const response = await userApi.updateFullName(fullName, token);
-      
+      const response = await userApi.updateFullName(fullName);
       if (response.statusCode === 201) {
         setFullNameDisabled(true);
         window.location.reload();
         showSuccess('Full name updated successfully');
-        setError('');
       }
     } catch (error) {
       showError(error.message || 'Failed to edit full name');
     } finally {
-      setFullNameDisabled(true);
       setIsFullNameLoading(false);
     }
-  };
+  }, [fullName]);
 
-  const editCoverImage = async () => {
+  const editCoverImage = useCallback(async () => {
     try {
       setIsEditing(true);
-      const token = getAuthToken();
-      if (!handleAuthError(navigate)) return;
-
       if (!coverImage) {
         showError('Please select a cover image');
-        setisEditCoverImage(false);
-        setIsEditing(false);
         return;
       }
-
-      const response = await userApi.updateCoverImage(coverImage, token);
-   
+      const response = await userApi.updateCoverImage(coverImage);
       if (response.statusCode === 200) {
-        setisEditCoverImage(false);
         window.location.reload();
         showSuccess('Cover image updated successfully');
-        setError('');
       }
     } catch (err) {
       showError(err.message || 'Failed to edit cover image');
@@ -152,28 +112,19 @@ const Profile = () => {
       setisEditCoverImage(false);
       setIsEditing(false);
     }
-  };
+  }, [coverImage]);
 
-  const editAvatar = async () => {
+  const editAvatar = useCallback(async () => {
     try {
       setIsAvatarLoading(true);
-      const token = getAuthToken();
-      if (!handleAuthError(navigate)) return;
-
       if (!avatar) {
         showError('Please select an avatar');
-        setIsEditAvatar(false);
-        setIsAvatarLoading(false);
         return;
       }
-
-      const response = await userApi.updateAvatar(avatar, token);
-
+      const response = await userApi.updateAvatar(avatar);
       if (response.statusCode === 200) {
-        setIsEditAvatar(false);
         window.location.reload();
         showSuccess('Avatar updated successfully');
-        setError('');
       }
     } catch (err) {
       showError(err.message || 'Failed to edit avatar');
@@ -181,14 +132,14 @@ const Profile = () => {
       setIsEditAvatar(false);
       setIsAvatarLoading(false);
     }
-  };
+  }, [avatar]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
     showSuccess('Logged out successfully');
-  };
+  }, [navigate]);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorDisplay error={error} />;

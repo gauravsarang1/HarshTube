@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import { ArrowLeft, Loader2, Music, Plus, Sparkles, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showSuccess, showError } from '../../utils/toast';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + '/api/v1';
 
 const CreatePlaylist = () => {
   const navigate = useNavigate();
@@ -33,23 +31,7 @@ const CreatePlaylist = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        showError('Please login to create a playlist');
-        return;
-      }
-
-      const response = await axios.post(
-        `${API_BASE_URL}/playlist/create`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const response = await api.post('/playlist/create', formData);
 
       if (response.data.statusCode === 201) {
         setSuccess(true);
