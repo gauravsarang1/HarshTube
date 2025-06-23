@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const likesSchema = new Schema({
     video: {
@@ -22,5 +23,7 @@ const likesSchema = new Schema({
         default: 'like'
     }
 }, {timestamps: true})
+
+likesSchema.plugin(mongooseAggregatePaginate)
 
 export const Like = model('Like', likesSchema)

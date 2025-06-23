@@ -189,16 +189,6 @@ const getVideoById = asyncHandler(async(req, res) => {
         throw new ApiError(404, 'Video not found');
     }
 
-    // Increment views if a user is watching, but not the owner
-    if (req.user && req.user._id.toString() !== video.owner._id.toString()) {
-        video.views += 1;
-        await video.save({ validateBeforeSave: false });
-    } else if (!req.user) {
-        // Also increment for non-logged-in users
-        video.views += 1;
-        await video.save({ validateBeforeSave: false });
-    }
-
     return res.status(200)
     .json(
         new ApiResponse(200, video, 'Video fetched successfully')

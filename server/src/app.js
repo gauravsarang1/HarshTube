@@ -29,6 +29,7 @@ import likeRouter from './routes/likes.routes.js'
 import playlistRouter from './routes/playlist.routes.js'
 import watchHistoryRouter from './routes/watchHistory.routes.js'
 import aiRouter from './routes/ai.routes.js'
+import viewRouter from './routes/view.routes.js'
 
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/videos', videoRouter)
@@ -39,5 +40,6 @@ app.use('/api/v1/likes', likeRouter)
 app.use('/api/v1/playlist', playlistRouter)
 app.use('/api/v1/watch-history', watchHistoryRouter)
 app.use('/api/v1/ai', aiRouter)
+app.use('/api/v1/views', viewRouter)
 
 export { app }
