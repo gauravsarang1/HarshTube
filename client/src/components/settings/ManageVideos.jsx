@@ -37,7 +37,13 @@ const ManageVideos = () => {
         
         const {videos, hasMore, totalPages, totalVideos} = data;
 
-        setVideos(prev => pageNum === 1 ? videos : [...prev, ...videos]);
+        // Avoid duplicates when appending new videos
+        setVideos(prev => {
+          if (pageNum === 1) return videos;
+          const existingIds = new Set(prev.map(v => v._id));
+          const newUniqueVideos = videos.filter(v => !existingIds.has(v._id));
+          return [...prev, ...newUniqueVideos];
+        });
         setHasMore(hasMore);
         setTotalPages(totalPages);
         setTotalVideos(totalVideos);

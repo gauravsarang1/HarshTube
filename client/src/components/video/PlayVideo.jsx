@@ -8,6 +8,10 @@ import { setIsActive, setCurrentTime, setVideoSrc, setVideoId} from '../../featu
 import { useSocket } from '../../context/SocketContext';
 import { setVideoTitle } from '../../features/body/commentSlice';
 import { useSubscription } from '../../hooks/useSubscription';
+import QualitySelector from './components/QualitySelector';
+import VideoControls from './components/VideoControls';
+import VideoProgress from './components/VideoProgress';
+import CenterPlayButton from './components/CenterPlayButton';
 
 const PlayVideo = () => {
   const { videoId } = useParams();
@@ -38,6 +42,7 @@ const PlayVideo = () => {
   const [watchHistoryAdded, setWatchHistoryAdded] = useState(false);
   const [views, setViews] = useState(0);
   const [isViewed, setIsViewed] = useState(false);
+  const [videoQuality, setVideoQuality] = useState(null);
   const socket = useSocket();
   const {
     isSubscribed,
@@ -46,6 +51,11 @@ const PlayVideo = () => {
     error: subscriptionError,
     toggleSubscription
   } = useSubscription(video?.owner?._id);
+  const [currentQuality, setCurrentQuality] = useState('q_auto:good');
+  const [currentProgress, setCurrentProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const progressBarRef = useRef(null);
+  const [pendingSeekTime, setPendingSeekTime] = useState(null);
   
   //const [subscriber, setSubscriber] = useState('');
 
@@ -110,6 +120,7 @@ const PlayVideo = () => {
       
       const videoData = response.data.data;
       setVideo(videoData);
+      setDuration(videoData.duration);
       dispatch(setVideoTitle(videoData.title));
       setError(null);
 
@@ -506,6 +517,128 @@ const PlayVideo = () => {
     addView();
   }, [videoId, loggedIn]);
 
+  const handleQualityChange = (quality) => {
+    console.log('quality changed to ', quality);
+    if (videoRef.current) {
+      const currentTime = videoRef.current.currentTime;
+      const wasPlaying = !videoRef.current.paused;
+      setPendingSeekTime({ time: currentTime, shouldPlay: wasPlaying });
+      setCurrentQuality(quality);
+    }
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleLoadedData = () => {
+      if (pendingSeekTime !== null) {
+        video.currentTime = pendingSeekTime.time;
+        setCurrentProgress(pendingSeekTime.time);
+        if (pendingSeekTime.shouldPlay) {
+          video.play();
+        }
+        setPendingSeekTime(null);
+      } else if (lastVideoTime && !isActive) {
+        video.currentTime = lastVideoTime;
+        setCurrentProgress(lastVideoTime);
+      } else if (currentTime) {
+        video.currentTime = currentTime;
+        setCurrentProgress(currentTime);
+      }
+
+      if (!isActive && isPlaying) {
+        video.play().catch(err => {
+          console.log('Autoplay prevented:', err);
+        });
+      }
+    };
+
+    video.addEventListener('loadeddata', handleLoadedData);
+
+    return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
+    };
+  }, [videoRef.current, pendingSeekTime, lastVideoTime, currentTime, isActive, isPlaying]);
+
+
+
+  const formatTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleTimelineClick = (e) => {
+    if (!progressBarRef.current || !videoRef.current) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const clickPosition = e.clientX - rect.left;
+    const percentage = (clickPosition / rect.width);
+    
+    if (percentage >= 0 && percentage <= 1) {
+      const newTime = percentage * duration;
+      videoRef.current.currentTime = newTime;
+      setCurrentProgress(newTime);
+    }
+  };
+
+  const handleTimelineMouseMove = (e) => {
+    if (!progressBarRef.current) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const percentage = (e.clientX - rect.left) / rect.width;
+    
+    if (percentage >= 0 && percentage <= 1) {
+      const previewTime = percentage * duration;
+      setCurrentProgress(previewTime);
+    }
+  };
+
+  // Add this new function to handle dragging
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleTimelineDragStart = (e) => {
+    setIsDragging(true);
+    document.addEventListener('mousemove', handleTimelineMouseMove);
+    document.addEventListener('mouseup', handleTimelineDragEnd);
+  };
+
+  const handleTimelineDragEnd = () => {
+    setIsDragging(false);
+    document.removeEventListener('mousemove', handleTimelineMouseMove);
+    document.removeEventListener('mouseup', handleTimelineDragEnd);
+    
+    if (videoRef.current) {
+      videoRef.current.currentTime = currentProgress;
+    }
+  };
+
+  useEffect(() => {
+    const currentVideo = videoRef.current;
+    if (!currentVideo) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentProgress(currentVideo.currentTime);
+    };
+
+    currentVideo.addEventListener('timeupdate', handleTimeUpdate);
+
+    return () => {
+      currentVideo.removeEventListener('timeupdate', handleTimeUpdate);
+    };
+  }, [videoRef.current]);
+
+  const getBufferedTime = () => {
+    if (!videoRef.current?.buffered?.length) return 0;
+    return videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
@@ -563,62 +696,52 @@ const PlayVideo = () => {
     <div className="min-h-screen pt-16 md:pt-20 px-2 sm:px-4 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {/* Video Player */}
+          <div className="lg:col-span-2 ">
             <div className="aspect-video group relative rounded-xl lg:rounded-2xl overflow-hidden bg-black shadow-xl border border-gray-200/50 dark:border-gray-700/50">
               <video
                 ref={videoRef}
-                src={video.filePath}
-                controls
+                src={`${video.filePath.split('/upload/')[0]}/upload/${currentQuality}/${video.filePath.split('/upload/')[1]}`}
                 className="w-full h-full main-video"
                 poster={video.thumbnail}
                 autoPlay={isPlaying}
                 disablePictureInPicture={true}
                 onEnded={() => setVideoEnded(true)}
+                playsInline
+                preload="metadata"
               />
-              <button
-                onClick={() => openMiniPlayer(video.filePath)}
-                className="absolute top-2 right-2 p-1.5 md:p-2 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Minimize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
-              </button>
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <button
-                  type="button"
-                  className="group/button relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-black/70 backdrop-blur-md rounded-full opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 ease-out shadow-2xl border border-white/20 hover:bg-black/80 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-white/30"
-                  tabIndex={0}
-                  aria-label={isPlaying ? "Pause video" : "Play video"}
-                  onClick={togglePlayPause}
-                >
-                  {/* Ripple effect background */}
-                  <div className="absolute inset-0 rounded-full bg-white/10 scale-0 group-hover/button:scale-100 transition-transform duration-500 ease-out opacity-0 group-hover/button:opacity-100" />
-                  
-                  {/* Pulsing ring animation when playing */}
-                  {isPlaying && (
-                    <div className="absolute inset-0 rounded-full border-2 border-white/40 animate-ping" />
-                  )}
-                  
-                  {/* Icon container with enhanced styling */}
-                  <div className="relative z-10 flex items-center justify-center">
-                    {isPlaying ? (
-                      <Pause className="w-6 h-6 md:w-8 md:h-8 text-white drop-shadow-2xl filter group-hover/button:text-blue-100 transition-colors duration-200" />
-                    ) : (
-                      <Play className="w-6 h-6 md:w-8 md:h-8 text-white drop-shadow-2xl filter group-hover/button:text-blue-100 transition-colors duration-200 ml-0.5 md:ml-1" />
-                    )}
-                  </div>
-                  
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Glowing effect on hover */}
-                  <div className="absolute inset-0 rounded-full shadow-lg shadow-blue-500/20 opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />
-                </button>
-                
-                {/* Background blur overlay for better contrast */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+               
+                <VideoControls
+                  isPlaying={isPlaying}
+                  togglePlayPause={togglePlayPause}
+                  currentProgress={currentProgress}
+                  duration={duration}
+                  currentQuality={currentQuality}
+                  onQualityChange={handleQualityChange}
+                  onMinimize={() => openMiniPlayer(video.filePath)}
+                  formatTime={formatTime}
+                />
+                 <VideoProgress
+                currentProgress={currentProgress}
+                duration={duration}
+                onSeek={(time) => {
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = time;
+                    setCurrentProgress(time);
+                  }
+                }}
+                onPreview={setCurrentProgress}
+                buffered={getBufferedTime()}
+                formatTime={formatTime}
+              />
               </div>
+              
+              <CenterPlayButton
+                isPlaying={isPlaying}
+                onClick={togglePlayPause}
+              />
             </div>
+           
 
             {/* Video Info */}
             <div className="mt-4 md:mt-6 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-800 dark:to-gray-900/80 p-4 md:p-8 rounded-xl lg:rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
