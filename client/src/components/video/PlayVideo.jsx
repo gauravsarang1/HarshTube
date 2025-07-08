@@ -639,6 +639,11 @@ const PlayVideo = () => {
     return videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
   };
 
+  const handleReletedVideoClick = () => {
+    dispatch(setCurrentTime(0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-950/80">
@@ -906,7 +911,7 @@ const PlayVideo = () => {
                   <Link
                     key={relatedVideo._id}
                     to={`/watch/${relatedVideo._id}`}
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    onClick={handleReletedVideoClick}
                     className="flex gap-2 md:gap-3 group hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 transition-all"
                   >
                     {/* Thumbnail */}

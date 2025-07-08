@@ -20,7 +20,7 @@ export default defineConfig({
   base: './', // ⚠️ SUPER IMPORTANT for routing to work correctly.
   server: {
     proxy: {
-      '/api': 'http://localhost:5050'
+      '/api': 'http://localhost:5000'
     }
   }
 });
