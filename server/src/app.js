@@ -4,13 +4,18 @@ import cookieParser from 'cookie-parser'
 
 const app = express()
 
+const allowedOrigins = [
+  'https://harsh-tube.vercel.app',
+  'https://harsh-tube-kmsb7zeke-gauravs-projects-dd9fd690.vercel.app',
+  'https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app',// e.g. http://localhost:5173 for dev
+]
+
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(process.env.CORS_ORIGIN)
+}
+
 app.use(cors({
-    origin: [
-      'https://harsh-tube.vercel.app',
-      'https://harsh-tube-kmsb7zeke-gauravs-projects-dd9fd690.vercel.app',
-      'https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app',
-      process.env.CORS_ORIGIN // e.g. http://localhost:5173 for dev
-    ],
+    origin: allowedOrigins,
     credentials: true
   }));
   

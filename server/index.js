@@ -7,12 +7,24 @@ import { Server } from 'socket.io';
 dotenv.config({path: '.env'})
 
 const httpServer = createServer(app);
+
+const allowedOrigins = [
+  'https://harsh-tube.vercel.app',
+  'https://harsh-tube-kmsb7zeke-gauravs-projects-dd9fd690.vercel.app',
+  'https://harsh-tube-3xg9jjwy2-gauravs-projects-dd9fd690.vercel.app',
+]
+
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(process.env.CORS_ORIGIN)
+}
+
 const io = new Server(httpServer, {
-    cors: {
-        origin: process.env.CORS_ORIGIN,
-        credentials: true
-    }
-});
+  cors: {
+    origin: allowedOrigins,
+    credentials: true
+  }
+})
+
 
 app.set('io', io);
 
